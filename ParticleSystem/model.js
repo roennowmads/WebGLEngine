@@ -163,8 +163,14 @@ function onMouseMove(e) {
 		}
 		
 		if (middleDown) {
-			view.rotateXCounter += (mouseY - mouseYOld)*0.005;
-			view.rotateYCounter += (mouseX - mouseXOld)*0.005;
+			if (!view.drawDepth) {
+				view.rotateXCounter += (mouseY - mouseYOld)*0.005;
+				view.rotateYCounter += (mouseX - mouseXOld)*0.005;
+			}
+			else if (!view.drawShadows) {
+				view.rotateShadowXCounter += (mouseY - mouseYOld)*0.005;
+				view.rotateShadowYCounter += (mouseX - mouseXOld)*0.005;
+			}
 		}
 		mouseXOld = mouseX;
 		mouseYOld = mouseY;

@@ -9,6 +9,7 @@ uniform vec3 uLightingColour;
 uniform sampler2D uTexture;
 uniform sampler2D uDepthMap;
 uniform bool uUseSpecular;
+uniform float uNoLighting;
 
 varying vec4 vVL; 
 
@@ -31,7 +32,7 @@ void main(void) {
 	}			
 
 	float directionalLightWeighting = max(NdotL, 0.0);
-	lightWeighting = directionalLightWeighting + uLightingColour * specularLightWeighting;
+	lightWeighting = directionalLightWeighting + uLightingColour * specularLightWeighting + uNoLighting;
 	
 	//Determine if the point is in shadow:
 	vec3 projectedDepth = vVL.xyz;

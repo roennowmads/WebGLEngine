@@ -6,7 +6,9 @@ function View() {
 	
 	this.house = new House(this);
 	this.groundModel;
+	this.sphereModel;
 	this.groundTex;
+	this.sphereTex;
 	
 	this.zoomFactor = 0.8;
 
@@ -31,7 +33,8 @@ function View() {
 	this.cameraPosition = vec3.create([0,5,5]);
 	this.lightPosition = vec3.create([-4,5,0]);
 	
-	this.rotateShadowCounter = 0.0;
+	this.rotateShadowXCounter = 0.0;
+	this.rotateShadowYCounter = 0.0;
 	this.rotateXCounter = 0.0;
 	this.rotateYCounter = 0.0;
 }
@@ -103,7 +106,7 @@ View.prototype.animate = function () {
 	timeLast = timeNow;
 	
 	if (this.drawShadows)
-		this.rotateShadowCounter += 0.05 * this.deltaTime;
+		this.rotateShadowYCounter += 0.05 * this.deltaTime;
 	if (this.isRotating) 
 		this.rotateYCounter -= 0.01 * this.deltaTime;
 }
@@ -118,8 +121,8 @@ View.prototype.draw = function () {
 	mat4.identity(vMatrix);
 
 	//Create depth map:
-	if (this.drawShadows)
-		this.drawHouseAndGroundFromLight(gl);
+	//if (this.drawShadows)
+	this.drawHouseAndGroundFromLight(gl);
 	
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
@@ -143,8 +146,8 @@ View.prototype.draw = function () {
 		
 		//Light position:
 		//View matrix transformation, takes the view matrix and adds rotation:
-		var quatY = quat4.fromAngleAxis(0, [1,0,0]);
-		var quatX = quat4.fromAngleAxis(-this.rotateShadowCounter*0.5, [0,1,0]);
+		var quatX = quat4.fromAngleAxis(-this.rotateShadowXCounter*0.5, [0,0,1]);
+		var quatY = quat4.fromAngleAxis(-this.rotateShadowYCounter*0.5, [0,1,0]);
 		var quatRes = quat4.multiply(quatX, quatY);
 		var rotMatrix = quat4.toMat4(quatRes);
 		mat4.multiply(vMatrix, rotMatrix, lightMat);
@@ -244,8 +247,8 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		//Setup light "camera"
 		mat4.lookAt(this.lightPosition, [0,0,0], [0,1,0], lightVMatrix);
 		
-		var quatY = quat4.fromAngleAxis(0, [1,0,0]);
-		var quatX = quat4.fromAngleAxis(this.rotateShadowCounter*0.5, [0,1,0]);
+		var quatX = quat4.fromAngleAxis(this.rotateShadowXCounter*0.5, [0,0,1]);
+		var quatY = quat4.fromAngleAxis(this.rotateShadowYCounter*0.5, [0,1,0]);
 		var quatRes = quat4.multiply(quatX, quatY);
 		var rotMatrix = quat4.toMat4(quatRes);
 		mat4.multiply(lightVMatrix, rotMatrix);
@@ -261,8 +264,8 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		
 		//Rotating block:
 		mvPushMatrix();	
-			var quatY = quat4.fromAngleAxis(this.rotateShadowCounter, [1,0,0]);
-			var quatX = quat4.fromAngleAxis(0, [0,1,0]);
+			var quatX = quat4.fromAngleAxis(0, [1,0,0]);
+			var quatY = quat4.fromAngleAxis(this.rotateShadowYCounter, [0,1,0]);
 			var quatRes = quat4.multiply(quatX, quatY);
 			var rotMatrix = quat4.toMat4(quatRes);
 			mat4.multiply(mMatrix, rotMatrix);
@@ -301,8 +304,10 @@ View.prototype.drawHouseAndGround = function (gl) {
 		mvPushMatrix();
 			var scaledMat = mat4.create();
 			mat4.scale(lightMat, [0.125, 0.125, 0.125], scaledMat);
-			this.groundModel.texture = this.groundTex.texture;
-			this.groundModel.drawWithMatrix(gl, scaledMat);
+			gl.uniform1f(this.currentProgram.getUniform("noLightingUniform"), 1.0);
+			this.sphereModel.texture = this.sphereTex.texture;
+			this.sphereModel.drawWithMatrix(gl, scaledMat);
+			gl.uniform1f(this.currentProgram.getUniform("noLightingUniform"), 0.0);
 		mvPopMatrix();
 		
 		//Ground:
@@ -315,8 +320,8 @@ View.prototype.drawHouseAndGround = function (gl) {
 		
 		//Rotating block:
 		mvPushMatrix();		
-			var quatY = quat4.fromAngleAxis(this.rotateShadowCounter, [1,0,0]);
-			var quatX = quat4.fromAngleAxis(0, [0,1,0]);
+			var quatX = quat4.fromAngleAxis(0, [1,0,0]);
+			var quatY = quat4.fromAngleAxis(this.rotateShadowYCounter, [0,1,0]);
 			var quatRes = quat4.multiply(quatX, quatY);
 			var rotMatrix = quat4.toMat4(quatRes);
 			mat4.multiply(mMatrix, rotMatrix);
@@ -420,25 +425,29 @@ View.prototype.setSpecularUniform = function (gl, useSpecular) {
 //Loading of files:
 View.prototype.loadModels = function (gl) {
 	this.groundModel = new GLObject(gl, this);
+	this.sphereModel = new GLObject(gl, this);
 	
-	var objectLoader = new FileLoader(13, startTicking, this); 
+	var objectLoader = new FileLoader(14, startTicking, this); 
 	
 	displayLoadState ("Downloading models");
 	
 	this.house.loadModels(gl, objectLoader);
 	loadMesh(gl, this.groundModel, "/ParticleSystem/ParticleSystem/Resources/x-models/ground.ctm", objectLoader);
+	loadMesh(gl, this.sphereModel, "/ParticleSystem/ParticleSystem/Resources/x-models/sphere.ctm", objectLoader);
 }
 
 View.prototype.loadTextures = function(thisClass) {
 	thisClass.cubeTex = new Texture();
 	thisClass.smokeTex = new Texture();
 	thisClass.groundTex = new Texture();
+	thisClass.sphereTex = new Texture();
 	
-	var objectLoader = new FileLoader(13, thisClass.setupShadersAndObjects, thisClass); 
+	var objectLoader = new FileLoader(14, thisClass.setupShadersAndObjects, thisClass); 
 	
 	displayLoadState ("Downloading textures");
 	
 	thisClass.house.loadTextures(thisClass.gl, objectLoader);
 	loadImageToTex(thisClass.gl, thisClass.groundTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Mortar_color.jpg", objectLoader);
+	loadImageToTex(thisClass.gl, thisClass.sphereTex, "/ParticleSystem/ParticleSystem/Resources/x-images/empty.png", objectLoader);
 	loadImageToTex(thisClass.gl, thisClass.smokeTex, "/ParticleSystem/ParticleSystem/Resources/x-images/smoke.png", objectLoader, true);
 }
