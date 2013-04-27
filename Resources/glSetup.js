@@ -1,5 +1,6 @@
 "use strict";
-
+var lightMat = mat4.create();
+var lightVCMatrix = mat4.create();
 var plmMatrix = mat4.create();
 var mvMatrix = mat4.create();
 var mMatrix = mat4.create();

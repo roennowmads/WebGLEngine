@@ -1,6 +1,6 @@
 "use strict";
 
-function GLObject (gl, view) {
+function GLObject (gl, view, useSpecular) {
 	this.vertexPositionBuffer;
 	this.vertexNormalBuffer;
 	this.vertexIndexBuffer;
@@ -9,6 +9,7 @@ function GLObject (gl, view) {
 	this.identifier;
 	this.texture;
 	this.view = view;
+	this.useSpecular = useSpecular;
 }
 
 GLObject.prototype.loadMeshFromCTMFile = function (file, gl, fileLoader) {
@@ -99,6 +100,7 @@ GLObject.prototype.draw = function (gl) {
 		
 	this.view.setNormalUniforms(gl); 
 	this.view.setShadowMatrixUniforms(gl);
+	this.view.setSpecularUniform(gl, this.useSpecular);
 	gl.drawElements(gl.TRIANGLES, this.indexNumItems, gl.UNSIGNED_SHORT, 0);
 	
 	this.view.lastGLObject = this.identifier;
@@ -113,3 +115,22 @@ GLObject.prototype.drawDepth = function (gl) {
 	
 	this.view.lastGLObject = this.identifier;
 }
+/*
+GLObject.prototype.drawS = function (gl) {		
+	//if (this.view.currentTexture != this.texture)		//Optimizes by not binding the texture, if the same texture is already bound.
+		this.bindTexture(gl);
+	
+	//if (this.identifier != this.view.lastGLObject) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
+		this.bindBuffers(gl);
+		
+	this.view.setNormalUniforms(gl); 
+    gl.uniformMatrix4fv(this.view.currentProgram.getUniform("mVMatrixUniform"), false, lightMat);
+	
+	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix);
+	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("pLMMatrixUniform"), false, plmMatrix);
+	
+	gl.drawElements(gl.TRIANGLES, this.indexNumItems, gl.UNSIGNED_SHORT, 0);
+	
+	this.view.lastGLObject = this.identifier;
+}
+*/

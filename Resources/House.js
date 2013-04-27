@@ -70,22 +70,22 @@ House.prototype.loadTextures = function (gl, objectLoader) {
 }
 
 House.prototype.loadModels = function (gl, objectLoader) {
-	var door = new GLObject(gl, this.view);
-	var doorHandle = new GLObject(gl, this.view);
-	var frontWallLogs = new GLObject(gl, this.view);
-	var backWall = new GLObject(gl, this.view);
-	var insideCottage = new GLObject(gl, this.view);
-	var interiorFloor = new GLObject(gl, this.view);
-	var leftWallLogs = new GLObject(gl, this.view);
-	var rightWallMortar = new GLObject(gl, this.view);
-	var patio = new GLObject(gl, this.view);
-	var pillars = new GLObject(gl, this.view);
-	var rightWallLogs = new GLObject(gl, this.view);
-	var roofPanel1 = new GLObject(gl, this.view);
-	var roofPanel2 = new GLObject(gl, this.view);
-	var roofAccessories = new GLObject(gl, this.view);
-	var upperWall = new GLObject(gl, this.view);
-	var upperWallBack = new GLObject(gl, this.view);
+	var door = new GLObject(gl, this.view, true);
+	//var doorHandle = new GLObject(gl, this.view, true);
+	var frontWallLogs = new GLObject(gl, this.view, true);
+	var backWall = new GLObject(gl, this.view, true);
+	var insideCottage = new GLObject(gl, this.view, true);
+	var interiorFloor = new GLObject(gl, this.view, true);
+	var leftWallLogs = new GLObject(gl, this.view, true);
+	var rightWallMortar = new GLObject(gl, this.view, true);
+	var patio = new GLObject(gl, this.view, true);
+	var pillars = new GLObject(gl, this.view, true);
+	var rightWallLogs = new GLObject(gl, this.view, true);
+	var roofPanel1 = new GLObject(gl, this.view, true);
+	var roofPanel2 = new GLObject(gl, this.view, true);
+	var roofAccessories = new GLObject(gl, this.view, true);
+	var upperWall = new GLObject(gl, this.view, true);
+	var upperWallBack = new GLObject(gl, this.view, true);
 	
 	this.models.push(
 		leftWallLogs, 

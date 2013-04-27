@@ -3,34 +3,35 @@ precision mediump float;
 varying vec2 vTextureCoord;
 varying vec3 vTransformedNormal;
 varying vec4 vPosition;
-varying vec3 vLightingPosition;
+varying vec3 vLightDirection;
 
-uniform vec3 uLightingColor;
+uniform vec3 uLightingColour;
 uniform sampler2D uTexture;
 uniform sampler2D uDepthMap;
+uniform bool uUseSpecular;
 
 varying vec4 vVL; 
 
 void main(void) {
-	vec3 lightWeighting;
-
 	//Phong shading:
-	lightWeighting = vec3(1.0, 1.0, 1.0);
+	vec3 lightWeighting = vec3(1.0, 1.0, 1.0);
+	//float lightWeighting = 1.0;
 	float specularLightWeighting = 0.0;
-	vec3 lightDirection = normalize(vLightingPosition);
-	vec3 transformedNormal = normalize(vTransformedNormal);
 
+	vec3 transformedNormal = normalize(vTransformedNormal); 
+	vec3 lightDirection = normalize(vLightDirection);
+	
 	vec3 reflectionDirection = reflect(-lightDirection, transformedNormal);
 		
 	float NdotL = dot(transformedNormal, lightDirection);
 
-	if (NdotL > 0.0) {
+	if (NdotL > 0.0 && uUseSpecular) {
 		vec3 eyeDirection = normalize(-vPosition.xyz);
-		specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 10.0); //uMaterialShininess);
+		specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 200.0); //uMaterialShininess);
 	}			
 
 	float directionalLightWeighting = max(NdotL, 0.0);
-	lightWeighting = directionalLightWeighting + uLightingColor * specularLightWeighting;
+	lightWeighting = directionalLightWeighting + uLightingColour * specularLightWeighting;
 	
 	//Determine if the point is in shadow:
 	vec3 projectedDepth = vVL.xyz;

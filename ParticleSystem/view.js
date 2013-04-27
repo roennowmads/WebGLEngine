@@ -28,7 +28,8 @@ function View() {
 	this.scripts;
 	this.particles;
 	
-	this.lightPosition = vec3.create([-2,4,7]);
+	this.cameraPosition = vec3.create([0,5,5]);
+	this.lightPosition = vec3.create([-4,5,0]);
 	
 	this.rotateShadowCounter = 0.0;
 	this.rotateCounter = 0.0;	
@@ -124,17 +125,27 @@ View.prototype.draw = function () {
 		this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.shadowFB, this.shadowFB.texDepth, this.shadowFB.texDepth);
 	} else {
 		//Draw the scene:
-		
 		this.currentProgram = this.scripts.getProgram("phongShadowShader").useProgram(gl);
 		
 		//Setup camera:
-		mat4.lookAt([0,4,5], [0,0,0], [0,1,0], vMatrix);
+		mat4.lookAt(this.cameraPosition, [0,0,0], [0,1,0], vMatrix);
 		
 		if (this.isRotating) {
 			var quatY = quat4.fromAngleAxis(this.rotateCounter, [0,1,0]);
 			var rotMatrix = quat4.toMat4(quatY);
 			mat4.multiply(vMatrix, rotMatrix);
 		}
+		
+		//Light position:
+		//View matrix transformation, takes the view matrix and adds rotation:
+		var quatY = quat4.fromAngleAxis(0, [1,0,0]);
+		var quatX = quat4.fromAngleAxis(-this.rotateShadowCounter*0.5, [0,1,0]);
+		var quatRes = quat4.multiply(quatX, quatY);
+		var rotMatrix = quat4.toMat4(quatRes);
+		mat4.multiply(vMatrix, rotMatrix, lightMat);
+		
+		//Model matrix transformation, takes the rotated view matrix and applies translation:
+		mat4.translate(lightMat, this.lightPosition);
 		
 		if (this.drawBloom) {
 			//Render the scene into a texture:
@@ -162,7 +173,6 @@ View.prototype.draw = function () {
 			gl.uniform1f(this.currentProgram.getUniform("tex2RateUniform"), 0.7);
 			this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texFront, this.sceneFB.texFront);
 			gl.enable(gl.DEPTH_TEST);
-			
 		}
 		else {
 			this.drawHouseAndGround(gl);
@@ -208,19 +218,6 @@ function startTicking() {
 		
 	//Start updating:
 	tick();
-}
-
-View.prototype.shadowFBinit = function (gl) {
-	//Create framebuffer with depth component:
-	this.shadowFB = new FBO(gl, 4096, true);
-}
-View.prototype.sceneFBinit = function (gl) {
-	//Create framebuffer with depth component:
-	this.sceneFB = new FBO(gl, 1024, true);
-}
-View.prototype.blurFBinit = function (gl) {
-	//Create framebuffer without depth component, and with linear texture filtering:
-	this.blurFB = new FBO(gl, 128, false, true);
 }
 
 View.prototype.drawHouseAndGroundFromLight = function (gl) {
@@ -323,6 +320,19 @@ View.prototype.drawHouseAndGround = function (gl) {
 	mvPopMatrix();
 }
 
+View.prototype.shadowFBinit = function (gl) {
+	//Create framebuffer with depth component:
+	this.shadowFB = new FBO(gl, 4096, true);
+}
+View.prototype.sceneFBinit = function (gl) {
+	//Create framebuffer with depth component:
+	this.sceneFB = new FBO(gl, 1024, true);
+}
+View.prototype.blurFBinit = function (gl) {
+	//Create framebuffer without depth component, and with linear texture filtering:
+	this.blurFB = new FBO(gl, 128, false, true);
+}
+
 View.prototype.setupShadowShader = function (gl) {
 	this.currentProgram = this.scripts.getProgram("shadowShader").useProgram(gl);
 	gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
@@ -338,6 +348,7 @@ View.prototype.setupPhongShadowShader = function (gl) {
 	gl.uniform1i(this.currentProgram.getUniform("depthMapUniform"), 1);
 	
 	gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
+	gl.uniform3fv(this.currentProgram.getUniform("lightingColourUniform"), [1.0,1.0,1.0]);
 	this.setMVMatrixUniforms(gl);
 	this.setPMatrixUniform(gl);
 	this.setNormalUniforms(gl); 
@@ -369,6 +380,9 @@ View.prototype.setShadowMatrixUniforms = function (gl) {
 	
 	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix);
 	gl.uniformMatrix4fv(this.currentProgram.getUniform("pLMMatrixUniform"), false, plmMatrix);
+	
+	//Light position update:
+	gl.uniform3fv(this.currentProgram.getUniform("lightPositionUniform"), mat4.multiplyVec3(lightMat, [0,0,0]));
 }
 
 View.prototype.setPMVMatrixUniforms = function (gl) {	
@@ -379,10 +393,13 @@ View.prototype.setPMVMatrixUniforms = function (gl) {
 
 View.prototype.setNormalUniforms = function (gl) {   
     var normalMatrix = mat3.create();
-	var mvMatrix = mat4.create();
     mat4.toInverseMat3(mat4.multiply(vMatrix, mMatrix, mvMatrix), normalMatrix);
     mat3.transpose(normalMatrix);
     gl.uniformMatrix3fv(this.currentProgram.getUniform("nMatrixUniform"), false, normalMatrix);
+}
+
+View.prototype.setSpecularUniform = function (gl, useSpecular) {   
+	gl.uniform1i(this.currentProgram.getUniform("useSpecularUniform"), useSpecular);
 }
 
 //Loading of files:
