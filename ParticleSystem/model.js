@@ -4,8 +4,10 @@ var startTime;
 var timeNow;
 
 var mouseX = 0, mouseY = 0;
+var mouseXOld = 0, mouseYOld = 0;
 var mouseOver = false;
 var mouseDown = false;
+var middleDown = false;
 
 var Keys = {RIGHT : 39, LEFT : 37, DOWN : 40, UP : 38, SPACE : 32};
 
@@ -24,8 +26,8 @@ function main () {
 	
 	canvasElm.onmouseover = function () { mouseOver = true; }
 	canvasElm.onmouseout = function () { mouseOver = false; }
-	canvasElm.onmousedown = function (e) { mouseDown = true; e.preventDefault(); }
-	canvasElm.onmouseup = function () { mouseDown = false; }
+	canvasElm.onmousedown = onMouseDown;
+	canvasElm.onmouseup = onMouseUp;
 	
 	document.addEventListener("webkitfullscreenchange", fullscreenChange, false)
 	document.addEventListener("mozfullscreenchange", fullscreenChange, false)
@@ -120,6 +122,28 @@ function onKeyDown (e) {
 	}
 }
 
+function onMouseDown (e) {
+	switch(e.button) {
+	case 0:
+		mouseDown = true;
+		break;
+	case 1:
+		middleDown = true;
+	}
+	e.preventDefault(); 
+}
+
+function onMouseUp (e) {
+	switch(e.button) {
+	case 0:
+		mouseDown = false;
+		break;
+	case 1:
+		middleDown = false;
+	}
+	e.preventDefault();  
+}
+
 function onMouseMove(e) {
 	if (mouseOver) {
 		if(e.offsetX == undefined) // this works for Firefox
@@ -137,17 +161,24 @@ function onMouseMove(e) {
 			mouseX = e.offsetX;
 			mouseY = e.offsetY;
 		}
+		
+		if (middleDown) {
+			view.rotateXCounter += (mouseY - mouseYOld)*0.005;
+			view.rotateYCounter += (mouseX - mouseXOld)*0.005;
+		}
+		mouseXOld = mouseX;
+		mouseYOld = mouseY;
 	}
+	else
+		middleDown = false;
 }
 
 function onMouseWheel(e) {
-	if (!view.isUpdatingPositions) {
-		if (e.wheelDeltaY > 0) {
-			view.zoomFactor *= 1.01;
-		}
-		else if (e.wheelDeltaY < 0) {
-			view.zoomFactor *= 0.99;
-		}
+	if (e.wheelDeltaY > 0) {
+		view.zoomFactor *= 1.05;
+	}
+	else if (e.wheelDeltaY < 0) {
+		view.zoomFactor *= 0.95;
 	}
 	e.preventDefault();
 	
@@ -263,6 +294,7 @@ function toggleDrawShadows () {
 }
 
 function toggleRotate () {
-	view.rotateCounter = 0;
+	if (view.isRotating)
+		view.rotateYCounter = 0;
 	view.isRotating = !view.isRotating;
 }

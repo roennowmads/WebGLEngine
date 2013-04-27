@@ -106,6 +106,28 @@ GLObject.prototype.draw = function (gl) {
 	this.view.lastGLObject = this.identifier;
 }
 
+GLObject.prototype.drawWithMatrix = function (gl, mMatrix) {	
+	//if (this.view.currentTexture != this.texture)		//Optimizes by not binding the texture, if the same texture is already bound.
+		this.bindTexture(gl);
+	
+	//if (this.identifier != this.view.lastGLObject) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
+		this.bindBuffers(gl);
+		
+	this.view.setNormalUniforms(gl); 
+	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("mVMatrixUniform"), false, mMatrix);
+	
+	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix);
+	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("pLMMatrixUniform"), false, plmMatrix);
+	
+	//Light position update:
+	gl.uniform3fv(this.view.currentProgram.getUniform("lightPositionUniform"), mat4.multiplyVec3(lightMat, [0,0,0]));
+	
+	this.view.setSpecularUniform(gl, this.useSpecular);
+	gl.drawElements(gl.TRIANGLES, this.indexNumItems, gl.UNSIGNED_SHORT, 0);
+	
+	this.view.lastGLObject = this.identifier;
+}
+
 GLObject.prototype.drawDepth = function (gl) {		
 	//if (this.identifier != this.view.lastGLObject) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
 		this.bindBuffersDepth(gl);
@@ -115,22 +137,3 @@ GLObject.prototype.drawDepth = function (gl) {
 	
 	this.view.lastGLObject = this.identifier;
 }
-/*
-GLObject.prototype.drawS = function (gl) {		
-	//if (this.view.currentTexture != this.texture)		//Optimizes by not binding the texture, if the same texture is already bound.
-		this.bindTexture(gl);
-	
-	//if (this.identifier != this.view.lastGLObject) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
-		this.bindBuffers(gl);
-		
-	this.view.setNormalUniforms(gl); 
-    gl.uniformMatrix4fv(this.view.currentProgram.getUniform("mVMatrixUniform"), false, lightMat);
-	
-	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix);
-	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("pLMMatrixUniform"), false, plmMatrix);
-	
-	gl.drawElements(gl.TRIANGLES, this.indexNumItems, gl.UNSIGNED_SHORT, 0);
-	
-	this.view.lastGLObject = this.identifier;
-}
-*/

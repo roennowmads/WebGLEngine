@@ -32,7 +32,8 @@ function View() {
 	this.lightPosition = vec3.create([-4,5,0]);
 	
 	this.rotateShadowCounter = 0.0;
-	this.rotateCounter = 0.0;	
+	this.rotateXCounter = 0.0;
+	this.rotateYCounter = 0.0;
 }
 
 View.prototype.initView = function () {
@@ -103,7 +104,8 @@ View.prototype.animate = function () {
 	
 	if (this.drawShadows)
 		this.rotateShadowCounter += 0.05 * this.deltaTime;
-	this.rotateCounter -= 0.01 * this.deltaTime;
+	if (this.isRotating) 
+		this.rotateYCounter -= 0.01 * this.deltaTime;
 }
 
 View.prototype.draw = function () {
@@ -130,11 +132,14 @@ View.prototype.draw = function () {
 		//Setup camera:
 		mat4.lookAt(this.cameraPosition, [0,0,0], [0,1,0], vMatrix);
 		
-		if (this.isRotating) {
-			var quatY = quat4.fromAngleAxis(this.rotateCounter, [0,1,0]);
-			var rotMatrix = quat4.toMat4(quatY);
-			mat4.multiply(vMatrix, rotMatrix);
-		}
+		//Camera rotation:
+		var quatX = quat4.fromAngleAxis(this.rotateXCounter, [1,0,0]);
+		var quatY = quat4.fromAngleAxis(this.rotateYCounter, [0,1,0]);
+		var quatRes = quat4.multiply(quatX, quatY);
+		var rotMatrix = quat4.toMat4(quatRes);
+		mat4.multiply(vMatrix, rotMatrix);
+		
+		mat4.scale(vMatrix, [this.zoomFactor,this.zoomFactor,this.zoomFactor]);
 		
 		//Light position:
 		//View matrix transformation, takes the view matrix and adds rotation:
@@ -174,7 +179,7 @@ View.prototype.draw = function () {
 			this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texFront, this.sceneFB.texFront);
 			gl.enable(gl.DEPTH_TEST);
 		}
-		else {
+		else {		
 			this.drawHouseAndGround(gl);
 			this.particles.draw(gl, false, this.pointSize);
 		}
@@ -223,6 +228,8 @@ function startTicking() {
 View.prototype.drawHouseAndGroundFromLight = function (gl) {
 	mvPushMatrix();
 		this.currentProgram = this.scripts.getProgram("shadowShader").useProgram(gl);
+		
+		gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
 		
 		//Bind the depth texture framebuffer:
 		this.shadowFB.bind(gl, this.shadowFB.front);
@@ -289,6 +296,14 @@ View.prototype.drawHouseAndGround = function (gl) {
 		gl.bindTexture(gl.TEXTURE_2D, this.shadowFB.texDepth);
 	
 		gl.disable(gl.BLEND);
+		
+		//Draw light as object:
+		mvPushMatrix();
+			var scaledMat = mat4.create();
+			mat4.scale(lightMat, [0.125, 0.125, 0.125], scaledMat);
+			this.groundModel.texture = this.groundTex.texture;
+			this.groundModel.drawWithMatrix(gl, scaledMat);
+		mvPopMatrix();
 		
 		//Ground:
 		mvPushMatrix();		
