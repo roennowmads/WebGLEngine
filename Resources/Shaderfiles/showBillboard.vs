@@ -3,13 +3,7 @@ precision lowp float;
 attribute vec2 aVertexCoords;
 
 uniform sampler2D uPos;
-
-uniform mat4 uMMatrix;
-uniform mat4 uVMatrix;
-uniform mat4 uPMatrix;
-
 uniform mat4 uPMVMatrix;
-
 uniform float uPointSize;
 
 void main() {

@@ -128,11 +128,10 @@ Particles.prototype.setupShowBillboardShader = function (gl) {
 	gl.uniform1i(this.view.currentProgram.getUniform("posUniform"), 0);
 	gl.uniform1i(this.view.currentProgram.getUniform("billUniform"), 1);
 	
-	this.view.setMVMatrixUniforms(gl);
-	this.view.setPMatrixUniform(gl);
+	this.view.setPMVMatrixUniforms(gl);
 	
 	this.showParticlesModel = new GLShowParticles(gl, 2, this.view);
-	this.showParticlesModel.generateParticlesAndBuffer(gl, this.view.numPointsSqrt);
+	this.showParticlesModel.generateParticleUVsAndBuffer(gl, this.view.numPointsSqrt);
 }
 
 Particles.prototype.setupUpdatePosShader = function (gl) {

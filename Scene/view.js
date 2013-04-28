@@ -29,6 +29,7 @@ function View() {
 	
 	this.scripts;
 	this.particles;
+	this.particleEmitter;
 	
 	this.cameraPosition = vec3.create([0,5,5]);
 	this.lightPosition = vec3.create([-4,5,0]);
@@ -63,6 +64,7 @@ View.prototype.initView = function () {
 	this.scripts.addProgram("phongShadowShader", "phongShadow", "phongShadow");
 	this.scripts.addProgram("blurShader", "FBTexture", "blur");
 	this.scripts.addProgram("renderTextureAdditiveShader", "FBTexture", "FBTextureAdditive");
+	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboard");
 	
 	//Downloads scripts and calls loadTextures when done, which calls setupShadersAndObjects when done:
 	this.scripts.loadScripts();
@@ -75,6 +77,8 @@ View.prototype.setupShadersAndObjects = function (thisClass) {
 	thisClass.particles = new Particles(thisClass, thisClass.smokeTex, true);
 	thisClass.particles2 = new Particles(thisClass, thisClass.house.textures[0], false);
 	
+	thisClass.particleEmitter = new ParticleEmitter(thisClass, thisClass.smokeTex);
+	
 	//Instantiate screen framebuffers for blooming:
 	thisClass.shadowFBinit(gl);
 	thisClass.sceneFBinit(gl);
@@ -86,6 +90,7 @@ View.prototype.setupShadersAndObjects = function (thisClass) {
 	//Setup the shaders:
 	thisClass.particles.setup(gl);
 	thisClass.particles2.setup(gl);
+	thisClass.particleEmitter.setup(gl);
 	thisClass.setupShadowShader(gl);
 	thisClass.setupPhongShadowShader(gl);
 	thisClass.setupRenderTextureShader(gl);
@@ -122,7 +127,7 @@ View.prototype.draw = function () {
 
 	//Create depth map:
 	//if (this.drawShadows)
-	this.drawHouseAndGroundFromLight(gl);
+	//this.drawHouseAndGroundFromLight(gl);
 	
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
@@ -185,6 +190,12 @@ View.prototype.draw = function () {
 		else {		
 			this.drawHouseAndGround(gl);
 			this.particles.draw(gl, false, this.pointSize);
+			mvPushMatrix();
+				this.currentProgram = this.scripts.getProgram("particleEmitterShader").useProgram(gl);
+				mat4.translate(mMatrix, [0.0,1.0,0.0]);
+				this.particleEmitter.draw(gl);
+				this.currentProgram = this.scripts.getProgram("phongShadowShader").useProgram(gl);
+			mvPopMatrix();
 		}
 		
 		if (this.drawPositions) {
@@ -387,12 +398,6 @@ View.prototype.setupRenderTextureAdditiveShader = function (gl) {
 
 View.prototype.setPMatrixUniform = function (gl) {
 	gl.uniformMatrix4fv(this.currentProgram.getUniform("pMatrixUniform"), false, pMatrix);
-}
-
-View.prototype.setMVMatrixUniforms = function (gl) {
-	console.log("hej")
-    gl.uniformMatrix4fv(this.currentProgram.getUniform("mMatrixUniform"), false, mMatrix);
-	gl.uniformMatrix4fv(this.currentProgram.getUniform("vMatrixUniform"), false, vMatrix);
 }
 
 View.prototype.setShadowMatrixUniforms = function (gl) {
