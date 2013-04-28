@@ -146,7 +146,7 @@ View.prototype.draw = function () {
 		
 		//Light position:
 		//View matrix transformation, takes the view matrix and adds rotation:
-		var quatX = quat4.fromAngleAxis(-this.rotateShadowXCounter*0.5, [0,0,1]);
+		var quatX = quat4.fromAngleAxis(-this.rotateShadowXCounter*0.5*0, [0,0,1]);
 		var quatY = quat4.fromAngleAxis(-this.rotateShadowYCounter*0.5, [0,1,0]);
 		var quatRes = quat4.multiply(quatX, quatY);
 		var rotMatrix = quat4.toMat4(quatRes);
@@ -247,7 +247,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		//Setup light "camera"
 		mat4.lookAt(this.lightPosition, [0,0,0], [0,1,0], lightVMatrix);
 		
-		var quatX = quat4.fromAngleAxis(this.rotateShadowXCounter*0.5, [0,0,1]);
+		var quatX = quat4.fromAngleAxis(this.rotateShadowXCounter*0.5*0, [0,0,1]);
 		var quatY = quat4.fromAngleAxis(this.rotateShadowYCounter*0.5, [0,1,0]);
 		var quatRes = quat4.multiply(quatX, quatY);
 		var rotMatrix = quat4.toMat4(quatRes);
@@ -356,7 +356,7 @@ View.prototype.blurFBinit = function (gl) {
 View.prototype.setupShadowShader = function (gl) {
 	this.currentProgram = this.scripts.getProgram("shadowShader").useProgram(gl);
 	gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
-	this.setMVMatrixUniforms(gl);
+	this.setShadowMatrixUniforms(gl);
 	this.setPMatrixUniform(gl);
 	this.setNormalUniforms(gl); 
 }
@@ -369,7 +369,7 @@ View.prototype.setupPhongShadowShader = function (gl) {
 	
 	gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
 	gl.uniform3fv(this.currentProgram.getUniform("lightingColourUniform"), [1.0,1.0,1.0]);
-	this.setMVMatrixUniforms(gl);
+	this.setShadowMatrixUniforms(gl);
 	this.setPMatrixUniform(gl);
 	this.setNormalUniforms(gl); 
 }
@@ -390,6 +390,7 @@ View.prototype.setPMatrixUniform = function (gl) {
 }
 
 View.prototype.setMVMatrixUniforms = function (gl) {
+	console.log("hej")
     gl.uniformMatrix4fv(this.currentProgram.getUniform("mMatrixUniform"), false, mMatrix);
 	gl.uniformMatrix4fv(this.currentProgram.getUniform("vMatrixUniform"), false, vMatrix);
 }
@@ -432,8 +433,8 @@ View.prototype.loadModels = function (gl) {
 	displayLoadState ("Downloading models");
 	
 	this.house.loadModels(gl, objectLoader);
-	loadMesh(gl, this.groundModel, "/ParticleSystem/ParticleSystem/Resources/x-models/ground.ctm", objectLoader);
-	loadMesh(gl, this.sphereModel, "/ParticleSystem/ParticleSystem/Resources/x-models/sphere.ctm", objectLoader);
+	loadMesh(gl, this.groundModel, "Scene/Resources/x-models/ground.ctm", objectLoader);
+	loadMesh(gl, this.sphereModel, "Scene/Resources/x-models/sphere.ctm", objectLoader);
 }
 
 View.prototype.loadTextures = function(thisClass) {
@@ -447,7 +448,7 @@ View.prototype.loadTextures = function(thisClass) {
 	displayLoadState ("Downloading textures");
 	
 	thisClass.house.loadTextures(thisClass.gl, objectLoader);
-	loadImageToTex(thisClass.gl, thisClass.groundTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Mortar_color.jpg", objectLoader);
-	loadImageToTex(thisClass.gl, thisClass.sphereTex, "/ParticleSystem/ParticleSystem/Resources/x-images/empty.png", objectLoader);
-	loadImageToTex(thisClass.gl, thisClass.smokeTex, "/ParticleSystem/ParticleSystem/Resources/x-images/smoke.png", objectLoader, true);
+	loadImageToTex(thisClass.gl, thisClass.groundTex, "Scene/Resources/x-images/House/Mortar_color.jpg", objectLoader);
+	loadImageToTex(thisClass.gl, thisClass.sphereTex, "Scene/Resources/x-images/empty.png", objectLoader);
+	loadImageToTex(thisClass.gl, thisClass.smokeTex, "Scene/Resources/x-images/smoke.png", objectLoader, true);
 }

@@ -19,9 +19,7 @@ GLObject.prototype.loadMeshFromCTMFile = function (file, gl, fileLoader) {
 	request.overrideMimeType("text/plain; charset=x-user-defined");
 	request.onreadystatechange = function () { 
 		if (request.readyState == 4) { 
-		
 			displayLoadState ("Downloaded model: " + file);
-		
 			glObject.handleLoadedCTMFile(request.responseText, gl, fileLoader);
 		}
 	}

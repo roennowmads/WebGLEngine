@@ -3,6 +3,7 @@ function House (view) {
 	this.view = view;
 	this.models = new Array();
 	this.textures = new Array();
+	this.relativePath = "Scene/Resources/";
 }
 
 House.prototype.draw = function (gl) {
@@ -56,17 +57,17 @@ House.prototype.loadTextures = function (gl, objectLoader) {
 		doorTex
 	); 
 	
-	loadImageToTex(gl, leftWallTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/LeftWallLogs_color.jpg", objectLoader);
-	loadImageToTex(gl, frontWallTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/FrontWallLogs_color.jpg", objectLoader);
-	loadImageToTex(gl, rightWallTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/LeftWallLogs_color.jpg", objectLoader);
-	loadImageToTex(gl, backWallTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/LeftWallLogs_color.jpg", objectLoader);
-	loadImageToTex(gl, upperWallTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/UpperWall_color.jpg", objectLoader);
-	loadImageToTex(gl, upperWallBackTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/UpperWall_color.jpg", objectLoader);
-	loadImageToTex(gl, roofTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Roof_color.jpg", objectLoader);
-	loadImageToTex(gl, roofAccessoriesTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/RoofAccessories_color.jpg", objectLoader);
-	loadImageToTex(gl, pillarsTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Pillars_color.jpg", objectLoader);
-	loadImageToTex(gl, patioTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Patio_color.jpg", objectLoader);
-	loadImageToTex(gl, doorTex, "/ParticleSystem/ParticleSystem/Resources/x-images/House/Door_color.jpg", objectLoader);
+	loadImageToTex(gl, leftWallTex, this.relativePath + "x-images/House/LeftWallLogs_color.jpg", objectLoader);
+	loadImageToTex(gl, frontWallTex, this.relativePath + "x-images/House/FrontWallLogs_color.jpg", objectLoader);
+	loadImageToTex(gl, rightWallTex, this.relativePath + "x-images/House/LeftWallLogs_color.jpg", objectLoader);
+	loadImageToTex(gl, backWallTex, this.relativePath + "x-images/House/LeftWallLogs_color.jpg", objectLoader);
+	loadImageToTex(gl, upperWallTex, this.relativePath + "x-images/House/UpperWall_color.jpg", objectLoader);
+	loadImageToTex(gl, upperWallBackTex, this.relativePath + "x-images/House/UpperWall_color.jpg", objectLoader);
+	loadImageToTex(gl, roofTex, this.relativePath + "x-images/House/Roof_color.jpg", objectLoader);
+	loadImageToTex(gl, roofAccessoriesTex, this.relativePath + "x-images/House/RoofAccessories_color.jpg", objectLoader);
+	loadImageToTex(gl, pillarsTex, this.relativePath + "x-images/House/Pillars_color.jpg", objectLoader);
+	loadImageToTex(gl, patioTex, this.relativePath + "x-images/House/Patio_color.jpg", objectLoader);
+	loadImageToTex(gl, doorTex, this.relativePath + "x-images/House/Door_color.jpg", objectLoader);
 }
 
 House.prototype.loadModels = function (gl, objectLoader) {
@@ -102,16 +103,16 @@ House.prototype.loadModels = function (gl, objectLoader) {
 		door
 	);
 
-	loadMesh(gl, door, "/ParticleSystem/ParticleSystem/Resources/x-models/door.ctm", objectLoader);
-	loadMesh(gl, frontWallLogs, "/ParticleSystem/ParticleSystem/Resources/x-models/frontWall.ctm", objectLoader);
-	loadMesh(gl, backWall, "/ParticleSystem/ParticleSystem/Resources/x-models/backWall.ctm", objectLoader);
-	loadMesh(gl, leftWallLogs, "/ParticleSystem/ParticleSystem/Resources/x-models/leftWall.ctm", objectLoader);
-	loadMesh(gl, patio, "/ParticleSystem/ParticleSystem/Resources/x-models/patio.ctm", objectLoader);
-	loadMesh(gl, pillars, "/ParticleSystem/ParticleSystem/Resources/x-models/pillars.ctm", objectLoader);
-	loadMesh(gl, rightWallLogs, "/ParticleSystem/ParticleSystem/Resources/x-models/rightWallFull.ctm", objectLoader);
-	loadMesh(gl, roofPanel1, "/ParticleSystem/ParticleSystem/Resources/x-models/roofPanel.ctm", objectLoader);
-	loadMesh(gl, roofPanel2, "/ParticleSystem/ParticleSystem/Resources/x-models/roofPanel2.ctm", objectLoader);
-	loadMesh(gl, roofAccessories, "/ParticleSystem/ParticleSystem/Resources/x-models/roofAccessories.ctm", objectLoader);
-	loadMesh(gl, upperWall, "/ParticleSystem/ParticleSystem/Resources/x-models/frontRoofWall.ctm", objectLoader);
-	loadMesh(gl, upperWallBack, "/ParticleSystem/ParticleSystem/Resources/x-models/backRoofWall.ctm", objectLoader);
+	loadMesh(gl, door, this.relativePath + "x-models/door.ctm", objectLoader);
+	loadMesh(gl, frontWallLogs, this.relativePath + "x-models/frontWall.ctm", objectLoader);
+	loadMesh(gl, backWall, this.relativePath + "x-models/backWall.ctm", objectLoader);
+	loadMesh(gl, leftWallLogs, this.relativePath + "x-models/leftWall.ctm", objectLoader);
+	loadMesh(gl, patio, this.relativePath + "x-models/patio.ctm", objectLoader);
+	loadMesh(gl, pillars, this.relativePath + "x-models/pillars.ctm", objectLoader);
+	loadMesh(gl, rightWallLogs, this.relativePath + "x-models/rightWallFull.ctm", objectLoader);
+	loadMesh(gl, roofPanel1, this.relativePath + "x-models/roofPanel.ctm", objectLoader);
+	loadMesh(gl, roofPanel2, this.relativePath + "x-models/roofPanel2.ctm", objectLoader);
+	loadMesh(gl, roofAccessories, this.relativePath + "x-models/roofAccessories.ctm", objectLoader);
+	loadMesh(gl, upperWall, this.relativePath + "x-models/frontRoofWall.ctm", objectLoader);
+	loadMesh(gl, upperWallBack, this.relativePath + "x-models/backRoofWall.ctm", objectLoader);
 }
