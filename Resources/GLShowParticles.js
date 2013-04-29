@@ -10,26 +10,44 @@ function GLShowParticles (gl, id, view) {
 
 GLShowParticles.prototype.generateEmitterAndBuffer = function (gl, particleCount, size, maxLifeTime) {
 	this.vertexPosBuffer = gl.createBuffer();
+	this.vertexVelBuffer = gl.createBuffer();
 	this.vertexLifeTimeBuffer = gl.createBuffer();
+	
+	this.maxLifeTime = maxLifeTime;
 	
 	this.itemSize = 3;
 	this.indexNumItems = particleCount;
 	
 	var posArray = new Array(this.indexNumItems*this.itemSize); 
+	var velArray = new Array(this.indexNumItems*this.itemSize); 
 	var lifeTimeArray = new Array(this.indexNumItems); 
 
-	var vertexPositions = new Float32Array(posArray); 	
+	var vertexPositions = new Float32Array(posArray); 
+	var vertexVelocities = new Float32Array(velArray); 	
 	var vertexLifeTimes = new Float32Array(lifeTimeArray); 	
 	posArray = null;
+	velArray = null;
 	lifeTimeArray = null;
 	
 	var maxInitPos = size;
 	var halfInitPos = maxInitPos/2;
+	var maxRadiusSqr = (maxInitPos - halfInitPos)*(maxInitPos - halfInitPos);
+	
 	for (var i = 0; i < this.indexNumItems; i++) {
 		var j = i*3;
-		vertexPositions[j] = Math.random()*maxInitPos - halfInitPos;
-		vertexPositions[j+1] = 0;
-		vertexPositions[j+2] = Math.random()*maxInitPos - halfInitPos;
+		do {
+			vertexPositions[j] = Math.random()*maxInitPos - halfInitPos;
+			vertexPositions[j+1] = 0;
+			vertexPositions[j+2] = Math.random()*maxInitPos - halfInitPos;
+		} while((vertexPositions[j]*vertexPositions[j]) + (vertexPositions[j+1]*vertexPositions[j+1]) + (vertexPositions[j+2]*vertexPositions[j+2]) > 
+			maxRadiusSqr);
+		
+		do {
+			vertexVelocities[j] = Math.random()*maxInitPos - halfInitPos;
+			vertexVelocities[j+1] = Math.random()*maxInitPos;
+			vertexVelocities[j+2] = Math.random()*maxInitPos - halfInitPos;
+		} while((vertexVelocities[j]*vertexVelocities[j]) + (vertexVelocities[j+1]*vertexVelocities[j+1]) + (vertexVelocities[j+2]*vertexVelocities[j+2]) > 
+			maxRadiusSqr);
 	}
 	
 	for (var i = 0; i < this.indexNumItems; i++) {
@@ -39,10 +57,14 @@ GLShowParticles.prototype.generateEmitterAndBuffer = function (gl, particleCount
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPosBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, vertexPositions, gl.STATIC_DRAW);
 	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexVelBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, vertexVelocities, gl.STATIC_DRAW);
+	
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexLifeTimeBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, vertexLifeTimes, gl.STATIC_DRAW);
 	
 	vertexPositions = null;
+	vertexVelocities = null;
 	vertexLifeTimes = null;
 	
 }
@@ -80,6 +102,9 @@ GLShowParticles.prototype.bindEmitterBuffers = function (gl) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPosBuffer);
 	gl.vertexAttribPointer(this.view.currentProgram.getAttribute("vertexPositionAttribute"), this.itemSize, gl.FLOAT, false, 0, 0);
 	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexVelBuffer);
+	gl.vertexAttribPointer(this.view.currentProgram.getAttribute("vertexVelocityAttribute"), this.itemSize, gl.FLOAT, false, 0, 0);
+	
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexLifeTimeBuffer);
 	gl.vertexAttribPointer(this.view.currentProgram.getAttribute("vertexLifeTimeAttribute"), 1, gl.FLOAT, false, 0, 0);
 }
@@ -93,8 +118,8 @@ GLShowParticles.prototype.drawEmitterBillboards = function (gl, billboardTex) {
 	//if (this.identifier != lastGLObject && lastDrawTarget != DRAWTARGETS.CANVAS) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
 	this.bindEmitterBuffers(gl);
 	
-	//console.log((timeNow-startTime) % 3000);
 	gl.uniform1f(this.view.currentProgram.getUniform("timeUniform"), (timeNow-startTime));
+	gl.uniform1f(this.view.currentProgram.getUniform("maxLifeTimeUniform"), this.maxLifeTime);
 	
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, billboardTex);

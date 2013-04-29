@@ -64,7 +64,7 @@ View.prototype.initView = function () {
 	this.scripts.addProgram("phongShadowShader", "phongShadow", "phongShadow");
 	this.scripts.addProgram("blurShader", "FBTexture", "blur");
 	this.scripts.addProgram("renderTextureAdditiveShader", "FBTexture", "FBTextureAdditive");
-	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboard");
+	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboardEmitter");
 	
 	//Downloads scripts and calls loadTextures when done, which calls setupShadersAndObjects when done:
 	this.scripts.loadScripts();
@@ -127,7 +127,7 @@ View.prototype.draw = function () {
 
 	//Create depth map:
 	//if (this.drawShadows)
-	//this.drawHouseAndGroundFromLight(gl);
+	this.drawHouseAndGroundFromLight(gl);
 	
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
@@ -190,12 +190,14 @@ View.prototype.draw = function () {
 		else {		
 			this.drawHouseAndGround(gl);
 			this.particles.draw(gl, false, this.pointSize);
+			gl.disable(gl.DEPTH_TEST);
 			mvPushMatrix();
 				this.currentProgram = this.scripts.getProgram("particleEmitterShader").useProgram(gl);
-				mat4.translate(mMatrix, [0.0,1.0,0.0]);
+				mat4.translate(mMatrix, [-0.22,0.7,-0.1]);
 				this.particleEmitter.draw(gl);
 				this.currentProgram = this.scripts.getProgram("phongShadowShader").useProgram(gl);
 			mvPopMatrix();
+			gl.enable(gl.DEPTH_TEST);
 		}
 		
 		if (this.drawPositions) {
