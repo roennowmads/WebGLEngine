@@ -135,6 +135,7 @@ View.prototype.draw = function () {
 		this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.shadowFB, this.shadowFB.texDepth, this.shadowFB.texDepth);
 	} else {
 		//Draw the scene:
+		
 		this.currentProgram = this.scripts.getProgram("phongShadowShader").useProgram(gl);
 		
 		//Setup camera:
@@ -147,6 +148,7 @@ View.prototype.draw = function () {
 		var rotMatrix = quat4.toMat4(quatRes);
 		mat4.multiply(vMatrix, rotMatrix);
 		
+		//Zoom:
 		mat4.scale(vMatrix, [this.zoomFactor,this.zoomFactor,this.zoomFactor]);
 		
 		//Light position:

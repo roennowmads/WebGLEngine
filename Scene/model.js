@@ -9,7 +9,7 @@ var mouseOver = false;
 var mouseDown = false;
 var middleDown = false;
 
-var Keys = {RIGHT : 39, LEFT : 37, DOWN : 40, UP : 38, SPACE : 32};
+var Keys = {RIGHT : 39, LEFT : 37, DOWN : 40, UP : 38, SPACE : 32, ALT: 18};
 
 var view;
 var origWidth;
@@ -19,6 +19,7 @@ function main () {
 	document.onmousemove = onMouseMove;
 	document.onmousewheel = onMouseWheel;
 	document.onkeydown = onKeyDown;
+	document.onkeyup = onKeyUp;
 	
 	var canvasElm = document.getElementById("canvas");
 	origWidth = canvasElm.width;
@@ -118,6 +119,23 @@ function onKeyDown (e) {
 		var count = document.getElementById("objectCount").value;
 		view = new View();
 		view.initView();
+		break;
+	case Keys.ALT:
+		if (mouseOver) {
+			middleDown = true;
+			e.preventDefault();
+		}
+		break;
+	}	
+}
+
+function onKeyUp (e) {
+	switch(e.keyCode) {
+	case Keys.ALT:
+		if (mouseOver) {
+			middleDown = false;
+			e.preventDefault();
+		}
 		break;
 	}
 }

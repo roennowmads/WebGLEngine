@@ -17,17 +17,10 @@ GLShowParticles.prototype.generateEmitterAndBuffer = function (gl, particleCount
 	
 	this.itemSize = 3;
 	this.indexNumItems = particleCount;
-	
-	var posArray = new Array(this.indexNumItems*this.itemSize); 
-	var velArray = new Array(this.indexNumItems*this.itemSize); 
-	var lifeTimeArray = new Array(this.indexNumItems); 
 
-	var vertexPositions = new Float32Array(posArray); 
-	var vertexVelocities = new Float32Array(velArray); 	
-	var vertexLifeTimes = new Float32Array(lifeTimeArray); 	
-	posArray = null;
-	velArray = null;
-	lifeTimeArray = null;
+	var vertexPositions = new Float32Array(this.indexNumItems*this.itemSize); 
+	var vertexVelocities = new Float32Array(this.indexNumItems*this.itemSize); 	
+	var vertexLifeTimes = new Float32Array(this.indexNumItems); 	
 	
 	var maxInitPos = size;
 	var halfInitPos = maxInitPos/2;
@@ -66,7 +59,6 @@ GLShowParticles.prototype.generateEmitterAndBuffer = function (gl, particleCount
 	vertexPositions = null;
 	vertexVelocities = null;
 	vertexLifeTimes = null;
-	
 }
 
 GLShowParticles.prototype.generateParticleUVsAndBuffer = function (gl, particleCountSqrt) {	
@@ -74,12 +66,9 @@ GLShowParticles.prototype.generateParticleUVsAndBuffer = function (gl, particleC
 	
 	this.itemSize = 2;
 	this.indexNumItems = particleCountSqrt*particleCountSqrt;
+	var vertexCoords = new Float32Array(this.indexNumItems*this.itemSize); 
 	
-	var array = new Array(this.indexNumItems*this.itemSize);  
-	var vertexCoords = new Float32Array(array); 
-	array = null;
-	
-	// width / height:
+	//width and height:
 	var particleCountSqrt = particleCountSqrt;
 	
 	//From 1D array to 2D array:
