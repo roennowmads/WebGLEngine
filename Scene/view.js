@@ -129,10 +129,12 @@ View.prototype.draw = function () {
     
     mat4.identity(mMatrix);
 	mat4.identity(vMatrix);
+	
+	//Update particle cloud state:
+	//this.particles.updateState(gl);
 
 	//Create depth map:
-	//if (this.drawShadows)
-	this.drawHouseAndGroundFromLight(gl);
+	this.drawHouseAndGroundFromLight(gl);	
 	
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
@@ -172,9 +174,11 @@ View.prototype.draw = function () {
 			this.sceneFB.bind(gl, this.sceneFB.front);
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 			this.drawHouseAndGround(gl);
+			this.particles.updateState(gl);
+			this.particles.drawBillboards(gl, this.pointSize);
 			mvPushMatrix();
 				mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
-				//this.particleEmitter.draw(gl);
+				this.particleEmitter.draw(gl);
 			mvPopMatrix();
 			
 			//Apply blur, first horizontal, then vertical:
@@ -195,7 +199,8 @@ View.prototype.draw = function () {
 		}
 		else {		
 			this.drawHouseAndGround(gl);
-			this.particles.draw(gl, false, this.pointSize);
+			this.particles.updateState(gl);
+			this.particles.drawBillboards(gl, this.pointSize);
 			mvPushMatrix();
 				mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
 				this.particleEmitter.draw(gl);
@@ -208,6 +213,8 @@ View.prototype.draw = function () {
 			this.squareModel.drawOnFBOne(gl, this.particles.posFB, this.particles.posFB.texBack);
 		}
 	}
+	
+	this.particles.swapBuffers();
 }
 
 View.prototype.setupCanvas = function (gl) {
@@ -298,6 +305,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		mvPopMatrix();
 		
 		mvPushMatrix();
+			this.particles.drawBillboards(gl, this.pointSize, true);
 			mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
 			this.particleEmitter.drawDepth(gl);
 		mvPopMatrix();

@@ -11,7 +11,23 @@ function Particles (view, texture, mouseControlled) {
 }
 
 
-Particles.prototype.draw = function (gl, buffer, pointSize) {
+Particles.prototype.draw = function (gl, pointSize) {
+	this.updateState(gl);
+	
+	//Draw on canvas:
+	this.drawBillboards(gl, pointSize);
+
+	this.swapBuffers();
+}
+
+Particles.prototype.setup = function (gl) {
+	this.setupUpdateVelShader(gl);
+	this.setupUpdatePosShader(gl);
+	this.setupFBAndInitTextures(gl);
+	this.setupShowBillboardShader(gl);
+}
+
+Particles.prototype.updateState = function (gl) {
 	if (this.first) 
     	this.drawInitialTextures(gl);
     
@@ -24,23 +40,15 @@ Particles.prototype.draw = function (gl, buffer, pointSize) {
     //Update positions:
     if(this.view.isUpdatingPositions)
     	this.updatePositions(gl);
-	
-	//Draw on canvas:
-	this.drawBillboards(gl, buffer, pointSize);
+}
 
+Particles.prototype.swapBuffers = function () {
 	this.posFB.swap();
 	this.velFB.swap();
 }
 
-Particles.prototype.setup = function (gl) {
-	this.setupUpdateVelShader(gl);
-	this.setupUpdatePosShader(gl);
-	this.setupFBAndInitTextures(gl);
-	this.setupShowBillboardShader(gl);
-}
-
 //Draw functions:
-Particles.prototype.drawBillboards = function (gl, buffer, pointSize) { 
+Particles.prototype.drawBillboards = function (gl, pointSize, depth) { 
 	this.view.currentProgram = this.view.scripts.getProgram("showBillboardShader").useProgram(gl);
 		
 	gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize);
@@ -50,16 +58,14 @@ Particles.prototype.drawBillboards = function (gl, buffer, pointSize) {
 		mat4.scale(mMatrix, [0.5, 0.5, 0.5]);
 	
 	    mat4.translate(mMatrix, [0, 0, 1]);		
-		if (buffer) {
-			buffer.bind(gl, buffer.front);
-			gl.viewport(0, 0, buffer.front.widthFB, buffer.front.heightFB);
+
+		if (!depth) {
+			this.showParticlesModel.drawBillboards(gl, this.posFB.texFront, this.texture.texture);
+		}	
+		else { 
+			gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize*pointSize);
+			this.showParticlesModel.drawBillboardsDepth(gl, this.posFB.texFront, this.texture.texture);
 		}
-		else {
-			this.posFB.unbind(gl);
-			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-		}
-	    this.showParticlesModel.drawBillboards(gl, this.posFB.texFront, this.texture.texture);
-		this.posFB.unbind(gl);
 	mvPopMatrix();
 }
 

@@ -57,6 +57,7 @@ SquareObject.prototype.drawOnFB = function (gl, FBO) {
     this.bindBuffers(gl);
     
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 }
 
 SquareObject.prototype.drawOnFBOne = function (gl, FBO, texture) {
@@ -71,6 +72,7 @@ SquareObject.prototype.drawOnFBOne = function (gl, FBO, texture) {
     
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
 	gl.enable(gl.DEPTH_TEST);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 }
 
 SquareObject.prototype.drawOnFBMulti = function (gl, FBO, texCurrent, texDelta) {
@@ -88,4 +90,5 @@ SquareObject.prototype.drawOnFBMulti = function (gl, FBO, texCurrent, texDelta) 
     
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
 	gl.enable(gl.DEPTH_TEST);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 }
