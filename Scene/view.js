@@ -4,6 +4,7 @@ function View() {
 	this.canvas;
 	this.gl;
 	
+	this.squareModel;
 	this.house = new House(this);
 	this.groundModel;
 	this.sphereModel;
@@ -73,11 +74,15 @@ View.prototype.initView = function () {
 View.prototype.setupShadersAndObjects = function (thisClass) {	
 	var gl = thisClass.gl;
 	
+	//Instantiate square object for rendering textures:
+	thisClass.squareModel = new SquareObject(gl, 1, thisClass);
+	thisClass.squareModel.createQuadAndSetup(gl);
+	
 	//Instantiate particles:
 	thisClass.particles = new Particles(thisClass, thisClass.smokeTex, true);
 	thisClass.particles2 = new Particles(thisClass, thisClass.house.textures[0], false);
 	
-	thisClass.particleEmitter = new ParticleEmitter(thisClass, thisClass.smokeTex);
+	thisClass.particleEmitter = new ParticleEmitter(thisClass, thisClass.smokeTex2);
 	
 	//Instantiate screen framebuffers for blooming:
 	thisClass.shadowFBinit(gl);
@@ -132,7 +137,7 @@ View.prototype.draw = function () {
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
 		this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
-		this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.shadowFB, this.shadowFB.texDepth, this.shadowFB.texDepth);
+		this.squareModel.drawOnFBMulti(this.gl, this.shadowFB, this.shadowFB.texDepth, this.shadowFB.texDepth);
 	} else {
 		//Draw the scene:
 		
@@ -153,9 +158,9 @@ View.prototype.draw = function () {
 		
 		//Light position:
 		//View matrix transformation, takes the view matrix and adds rotation:
-		var quatX = quat4.fromAngleAxis(-this.rotateShadowXCounter*0.5*0, [0,0,1]);
+		var quatX = quat4.fromAngleAxis(-this.rotateShadowXCounter*0.5, [0,0,1]);
 		var quatY = quat4.fromAngleAxis(-this.rotateShadowYCounter*0.5, [0,1,0]);
-		var quatRes = quat4.multiply(quatX, quatY);
+		var quatRes = quat4.multiply(quatY, quatX);
 		var rotMatrix = quat4.toMat4(quatRes);
 		mat4.multiply(vMatrix, rotMatrix, lightMat);
 		
@@ -167,47 +172,40 @@ View.prototype.draw = function () {
 			this.sceneFB.bind(gl, this.sceneFB.front);
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 			this.drawHouseAndGround(gl);
-			//this.particles.draw(gl, this.sceneFB);
+			mvPushMatrix();
+				mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
+				//this.particleEmitter.draw(gl);
+			mvPopMatrix();
 			
-			//Depth testing is unnecessary for 2D image rendering, so it is disabled:
-			gl.disable(gl.DEPTH_TEST);
 			//Apply blur, first horizontal, then vertical:
 			this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
 			//Bind the blur framebuffer:
 			this.blurFB.bind(gl, this.blurFB.front);
 			gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
-			//Here the model used for the particles is used, simply because a square model was needed, and it was the fastest way:
-			this.particles.FBparticlesModel.drawOnFBOne(this.gl, this.sceneFB, this.sceneFB.texFront);
+			this.squareModel.drawOnFBOne(this.gl, this.sceneFB, this.sceneFB.texFront);
 			gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
-			this.particles.FBparticlesModel.drawOnFBOne(this.gl, this.sceneFB, this.blurFB.texFront);
+			this.squareModel.drawOnFBOne(this.gl, this.sceneFB, this.blurFB.texFront);
 			
 			//Render the texture:
 			this.currentProgram = this.scripts.getProgram("renderTextureAdditiveShader").useProgram(gl);
 			this.sceneFB.unbind(gl);
 			gl.uniform1f(this.currentProgram.getUniform("tex1RateUniform"), 0.75);
 			gl.uniform1f(this.currentProgram.getUniform("tex2RateUniform"), 0.7);
-			this.particles.FBparticlesModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texFront, this.sceneFB.texFront);
-			gl.enable(gl.DEPTH_TEST);
+			this.squareModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texFront, this.sceneFB.texFront);
 		}
 		else {		
 			this.drawHouseAndGround(gl);
 			this.particles.draw(gl, false, this.pointSize);
-			gl.disable(gl.DEPTH_TEST);
 			mvPushMatrix();
-				this.currentProgram = this.scripts.getProgram("particleEmitterShader").useProgram(gl);
-				mat4.translate(mMatrix, [-0.22,0.7,-0.1]);
+				mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
 				this.particleEmitter.draw(gl);
-				this.currentProgram = this.scripts.getProgram("phongShadowShader").useProgram(gl);
 			mvPopMatrix();
-			gl.enable(gl.DEPTH_TEST);
 		}
 		
 		if (this.drawPositions) {
 			//Draw the positions map used for the particles, directly to the screen:
-			gl.disable(gl.DEPTH_TEST);
 			this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
-			this.particles.FBparticlesModel.drawOnFBOne(gl, this.particles.posFB, this.particles.posFB.texBack);
-			gl.enable(gl.DEPTH_TEST);
+			this.squareModel.drawOnFBOne(gl, this.particles.posFB, this.particles.posFB.texBack);
 		}
 	}
 }
@@ -216,6 +214,7 @@ View.prototype.setupCanvas = function (gl) {
 	gl.clearColor(0.1, 0.1, 0.2, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.BLEND);
+	//gl.blendEquationSeparate(gl.FUNC_REVERSE_SUBTRACT,gl.FUNC_ADD);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.frontFace(gl.CCW);
 	gl.enable(gl.CULL_FACE);
@@ -262,7 +261,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		//Setup light "camera"
 		mat4.lookAt(this.lightPosition, [0,0,0], [0,1,0], lightVMatrix);
 		
-		var quatX = quat4.fromAngleAxis(this.rotateShadowXCounter*0.5*0, [0,0,1]);
+		var quatX = quat4.fromAngleAxis(this.rotateShadowXCounter*0.5, [0,0,1]);
 		var quatY = quat4.fromAngleAxis(this.rotateShadowYCounter*0.5, [0,1,0]);
 		var quatRes = quat4.multiply(quatX, quatY);
 		var rotMatrix = quat4.toMat4(quatRes);
@@ -292,10 +291,16 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 			this.groundModel.drawDepth(gl);
 		mvPopMatrix();
 		
-		mat4.scale(mMatrix, [.001, .001, .001]);
-		
 		//Draw house:
-		this.house.drawDepth(gl);
+		mvPushMatrix();	
+			mat4.scale(mMatrix, [.001, .001, .001]);
+			this.house.drawDepth(gl);
+		mvPopMatrix();
+		
+		mvPushMatrix();
+			mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
+			this.particleEmitter.drawDepth(gl);
+		mvPopMatrix();
 		
 		//Unbind framebuffer:
 		this.shadowFB.unbind(gl);
@@ -449,10 +454,11 @@ View.prototype.loadModels = function (gl) {
 View.prototype.loadTextures = function(thisClass) {
 	thisClass.cubeTex = new Texture();
 	thisClass.smokeTex = new Texture();
+	thisClass.smokeTex2 = new Texture();
 	thisClass.groundTex = new Texture();
 	thisClass.sphereTex = new Texture();
 	
-	var objectLoader = new FileLoader(14, thisClass.setupShadersAndObjects, thisClass); 
+	var objectLoader = new FileLoader(15, thisClass.setupShadersAndObjects, thisClass); 
 	
 	displayLoadState ("Downloading textures");
 	
@@ -460,4 +466,5 @@ View.prototype.loadTextures = function(thisClass) {
 	loadImageToTex(thisClass.gl, thisClass.groundTex, "Scene/Resources/x-images/House/Mortar_color.jpg", objectLoader);
 	loadImageToTex(thisClass.gl, thisClass.sphereTex, "Scene/Resources/x-images/empty.png", objectLoader);
 	loadImageToTex(thisClass.gl, thisClass.smokeTex, "Scene/Resources/x-images/smoke.png", objectLoader, true);
+	loadImageToTex(thisClass.gl, thisClass.smokeTex2, "Scene/Resources/x-images/smoke2.png", objectLoader);
 }

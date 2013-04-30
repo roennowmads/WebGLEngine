@@ -3,7 +3,6 @@
 function Particles (view, texture, mouseControlled) {
 	this.view = view;
 	this.texture = texture;
-	this.FBparticlesModel; 
 	this.showParticlesModel;
 	this.velFB;
 	this.posFB;
@@ -78,7 +77,7 @@ Particles.prototype.updateVelocities = function (gl) {
 		gl.uniform1f(this.view.currentProgram.getUniform("mouseDownUniform"), 1);  
 	}
 	this.velFB.bind(gl, this.velFB.back);
-    this.FBparticlesModel.drawOnFBMulti(gl, this.velFB, this.velFB.texBack, this.posFB.texBack);
+    this.view.squareModel.drawOnFBMulti(gl, this.velFB, this.velFB.texBack, this.posFB.texBack);
 	this.velFB.unbind(gl);
 }
 
@@ -88,7 +87,7 @@ Particles.prototype.updatePositions = function (gl) {
     gl.uniform1f(this.view.currentProgram.getUniform("timeUniform"), this.view.deltaTime);
 
 	this.posFB.bind(gl, this.posFB.back);
-    this.FBparticlesModel.drawOnFBMulti(gl, this.posFB, this.posFB.texBack, this.velFB.texBack);
+    this.view.squareModel.drawOnFBMulti(gl, this.posFB, this.posFB.texBack, this.velFB.texBack);
 	this.posFB.unbind(gl);
 }
 
@@ -102,7 +101,7 @@ Particles.prototype.drawInitialTextures = function (gl) {
 	gl.uniform1f(this.view.currentProgram.getUniform("correctionUniform"), 0.45);
 	
 	this.posFB.bind(gl, this.posFB.back);
-	this.FBparticlesModel.drawOnFB(gl, this.posFB);
+	this.view.squareModel.drawOnFB(gl, this.posFB);
 	this.posFB.unbind(gl);
 	///
 
@@ -112,7 +111,7 @@ Particles.prototype.drawInitialTextures = function (gl) {
 	gl.uniform1f(this.view.currentProgram.getUniform("correctionUniform"), 0.45);
 	
 	this.velFB.bind(gl, this.velFB.back);
-	this.FBparticlesModel.drawOnFB(gl, this.velFB);
+	this.view.squareModel.drawOnFB(gl, this.velFB);
 	this.velFB.unbind(gl);
 	
 	this.first = false;
@@ -150,9 +149,6 @@ Particles.prototype.setupUpdateVelShader = function (gl) {
 
 Particles.prototype.setupFBAndInitTextures = function (gl) {
 	this.view.currentProgram = this.view.scripts.getProgram("initialParticleShader").useProgram(gl);
-
-	this.FBparticlesModel = new GLFBParticles(gl, 1, this.view);
-	this.FBparticlesModel.createQuadAndSetup(gl);
 	
 	this.velFB = new FBO(gl, this.view.numPointsSqrt);
 	this.posFB = new FBO(gl, this.view.numPointsSqrt);

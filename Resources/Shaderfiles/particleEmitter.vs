@@ -17,5 +17,5 @@ void main () {
 	
 	gl_Position = uPMVMatrix * vec4(position, 1.0);
 	
-	gl_PointSize = .075*(1.0/gl_Position.z)*vAge*2000.0;
+	gl_PointSize = .085*(1.0/gl_Position.z)*vAge*2000.0;
 }

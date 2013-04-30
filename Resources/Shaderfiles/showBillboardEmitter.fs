@@ -8,5 +8,5 @@ void main(void) {
 
 	vec4 sample = texture2D(uBill, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
 
-	gl_FragColor = vec4(sample.rgb, sample.a - vAge*.1);
+	gl_FragColor = vec4(sample.rgb, sample.a - vAge*0.25 - 0.75);
 }

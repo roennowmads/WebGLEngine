@@ -117,6 +117,20 @@ GLShowParticles.prototype.drawEmitterBillboards = function (gl, billboardTex) {
 	gl.drawArrays(gl.POINTS, 0, this.indexNumItems)
 }
 
+GLShowParticles.prototype.drawEmitterBillboardsDepth = function (gl) {
+	//if (this.identifier != lastGLObject && lastDrawTarget != DRAWTARGETS.CANVAS) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
+	this.bindEmitterBuffers(gl);
+	
+	gl.uniform1f(this.view.currentProgram.getUniform("timeUniform"), (timeNow-startTime));
+	gl.uniform1f(this.view.currentProgram.getUniform("maxLifeTimeUniform"), this.maxLifeTime);
+	
+	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix)
+	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("pMVMatrixUniform"), false, plmMatrix);
+	
+	//this.view.setShadowMatrixUniforms(gl);
+	gl.drawArrays(gl.POINTS, 0, this.indexNumItems)
+}
+
 GLShowParticles.prototype.drawBillboards = function (gl, posTex, billboardTex) {
 	//if (this.identifier != lastGLObject && lastDrawTarget != DRAWTARGETS.CANVAS) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
 	this.bindUVsBuffer(gl);

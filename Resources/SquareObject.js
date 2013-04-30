@@ -1,6 +1,6 @@
 "use strict";
 
-function GLFBParticles (gl, id, view) {
+function SquareObject (gl, id, view) {
 	this.vertexPositionBuffer;
 	this.texCoordsBuffer;
 	this.indexNumItems = 0;
@@ -11,7 +11,7 @@ function GLFBParticles (gl, id, view) {
 	this.view = view;
 }
 
-GLFBParticles.prototype.createQuadAndSetup = function (gl) {
+SquareObject.prototype.createQuadAndSetup = function (gl) {
 	this.vertexPositionBuffer = gl.createBuffer();
 	this.texCoordsBuffer = gl.createBuffer();
 	
@@ -43,7 +43,7 @@ GLFBParticles.prototype.createQuadAndSetup = function (gl) {
 	gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.DYNAMIC_DRAW);
 }
 
-GLFBParticles.prototype.bindBuffers = function (gl) {
+SquareObject.prototype.bindBuffers = function (gl) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
 	gl.vertexAttribPointer(this.view.currentProgram.getAttribute("positionAttribute"), this.itemSize, gl.FLOAT, false, 0, 0);
 	
@@ -51,7 +51,7 @@ GLFBParticles.prototype.bindBuffers = function (gl) {
 	gl.vertexAttribPointer(this.view.currentProgram.getAttribute("texCoordsAttribute"), 2, gl.FLOAT, false, 0, 0);
 }
 
-GLFBParticles.prototype.drawOnFB = function (gl, FBO) {
+SquareObject.prototype.drawOnFB = function (gl, FBO) {
 	gl.viewport(0, 0, FBO.widthFB, FBO.heightFB);
 	
     this.bindBuffers(gl);
@@ -59,7 +59,9 @@ GLFBParticles.prototype.drawOnFB = function (gl, FBO) {
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
 }
 
-GLFBParticles.prototype.drawOnFBOne = function (gl, FBO, texture) {
+SquareObject.prototype.drawOnFBOne = function (gl, FBO, texture) {
+	//Depth testing is unnecessary for 2D image rendering, so it is disabled:
+	gl.disable(gl.DEPTH_TEST);
 	gl.viewport(0, 0, FBO.widthFB, FBO.heightFB);
     
     this.bindBuffers(gl);
@@ -68,9 +70,12 @@ GLFBParticles.prototype.drawOnFBOne = function (gl, FBO, texture) {
 	gl.bindTexture(gl.TEXTURE_2D, texture);
     
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
+	gl.enable(gl.DEPTH_TEST);
 }
 
-GLFBParticles.prototype.drawOnFBMulti = function (gl, FBO, texCurrent, texDelta) {
+SquareObject.prototype.drawOnFBMulti = function (gl, FBO, texCurrent, texDelta) {
+	//Depth testing is unnecessary for 2D image rendering, so it is disabled:
+	gl.disable(gl.DEPTH_TEST);
 	gl.viewport(0, 0, FBO.widthFB, FBO.heightFB);
     
 	this.bindBuffers(gl);
@@ -82,4 +87,5 @@ GLFBParticles.prototype.drawOnFBMulti = function (gl, FBO, texCurrent, texDelta)
 	gl.bindTexture(gl.TEXTURE_2D, texDelta);
     
     gl.drawArrays(gl.TRIANGLES, 0, this.indexNumItems);
+	gl.enable(gl.DEPTH_TEST);
 }
