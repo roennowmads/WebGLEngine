@@ -10,9 +10,18 @@ ParticleEmitter.prototype.setup = function (gl) {
 	this.setupShowBillboardShader(gl);
 }
 
+ParticleEmitter.prototype.drawBloom = function (gl) {
+	gl.disable(gl.DEPTH_TEST);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+	this.view.currentProgram = this.particleEmitterShader.useProgram(gl);
+	this.showParticlesModel.drawEmitterBillboards(gl, this.texture.texture);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable(gl.DEPTH_TEST);
+}
+
 ParticleEmitter.prototype.draw = function (gl) {
 	gl.disable(gl.DEPTH_TEST);
-	gl.blendEquationSeparate(gl.FUNC_REVERSE_SUBTRACT,gl.FUNC_ADD);
+	gl.blendEquationSeparate(gl.FUNC_REVERSE_SUBTRACT, gl.FUNC_ADD);
 	this.view.currentProgram = this.particleEmitterShader.useProgram(gl);
 	this.showParticlesModel.drawEmitterBillboards(gl, this.texture.texture);
 	gl.blendEquation(gl.FUNC_ADD);

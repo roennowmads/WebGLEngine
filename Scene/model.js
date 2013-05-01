@@ -293,8 +293,6 @@ function toggleVelocities () {
 function togglePositions () {
 	var posInput = document.getElementById("posInput");
 	view.isUpdatingPositions = posInput.checked;
-	view.zoomFactor = 1.0;
-	view.rotYAngle = 0.0;
 }
 
 function updatePointSize () {

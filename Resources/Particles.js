@@ -48,7 +48,7 @@ Particles.prototype.swapBuffers = function () {
 }
 
 //Draw functions:
-Particles.prototype.drawBillboards = function (gl, pointSize, depth) { 
+Particles.prototype.drawBillboards = function (gl, pointSize, depth, amplify) { 
 	mvPushMatrix();		
 		mat4.translate(mMatrix, [0.0,-1.0,-2.0]);
 		mat4.scale(mMatrix, [0.5, 0.5, 0.5]);
@@ -56,13 +56,19 @@ Particles.prototype.drawBillboards = function (gl, pointSize, depth) {
 	    mat4.translate(mMatrix, [0, 0, 1]);		
 
 		if (!depth) {
+			//Amplify fragment output for blooming:
+			if (!amplify)
+				amplify = 1.0;
 			this.view.currentProgram = this.view.scripts.getProgram("showBillboardShader").useProgram(gl);
 			gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize);
+			gl.uniform1f(this.view.currentProgram.getUniform("amplifyUniform"), amplify);
 			this.showParticlesModel.drawBillboards(gl, this.posFB.texFront, this.texture.texture);
 		}	
 		else { 
 			this.view.currentProgram = this.view.scripts.getProgram("showBillboardShadowShader").useProgram(gl);
 			//Make the shadow for the points bigger, so their size correspond to the object's size:
+			//(this happens because the point size is relative to the distance from the camera, 
+			// while the points' shadows sixe is relative to the distance from the light)
 			gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize*pointSize);
 			this.showParticlesModel.drawBillboardsDepth(gl, this.posFB.texFront);
 		}

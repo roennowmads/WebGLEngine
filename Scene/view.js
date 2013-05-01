@@ -110,9 +110,6 @@ View.prototype.animate = function () {
 	timeNow = Date.now();
 	var elapsed = timeNow - timeLast;
     this.deltaTime = 0.001 * elapsed * 60;
-	
-	//if (this.isUpdatingPositions) 
-	//	this.rotYAngle = 0;
 		
 	timeLast = timeNow;
 	
@@ -176,10 +173,12 @@ View.prototype.draw = function () {
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 			this.drawHouseAndGround(gl);
 			this.particles.updateState(gl);
-			this.particles.drawBillboards(gl, this.pointSize);
+			//Need to bind framebuffer again after particle state update:
+			this.sceneFB.bind(gl, this.sceneFB.front);		
+			this.particles.drawBillboards(gl, this.pointSize, false, 3.0);
 			mvPushMatrix();
 				mat4.translate(mMatrix, [-0.22,0.6,-0.1]);
-				this.particleEmitter.draw(gl);
+				this.particleEmitter.drawBloom(gl);
 			mvPopMatrix();
 			
 			//Apply blur, first horizontal, then vertical:
@@ -222,7 +221,6 @@ View.prototype.setupCanvas = function (gl) {
 	gl.clearColor(0.1, 0.1, 0.2, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.BLEND);
-	//gl.blendEquationSeparate(gl.FUNC_REVERSE_SUBTRACT,gl.FUNC_ADD);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.frontFace(gl.CCW);
 	gl.enable(gl.CULL_FACE);

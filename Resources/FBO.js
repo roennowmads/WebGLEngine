@@ -47,10 +47,12 @@ FBO.prototype.bindFBAndAttachTex = function (gl, buffer, tex) {
 
 FBO.prototype.bind = function (gl, buffer) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+	gl.viewport(0, 0, this.widthFB, this.heightFB);
 }
 
 FBO.prototype.unbind = function (gl) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 }
 
 FBO.prototype.swap = function (gl) {

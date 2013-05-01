@@ -1,7 +1,8 @@
 precision lowp float;
 
 uniform sampler2D uBill;
+uniform float uAmplify;
 
 void main(void) {
-	gl_FragColor = texture2D(uBill, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
+	gl_FragColor = texture2D(uBill, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y))*uAmplify;
 }
