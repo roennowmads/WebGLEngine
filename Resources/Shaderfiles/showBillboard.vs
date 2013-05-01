@@ -13,5 +13,4 @@ void main() {
 	gl_PointSize = uPointSize;
 
 	gl_Position = uPMVMatrix * position;
-
 }

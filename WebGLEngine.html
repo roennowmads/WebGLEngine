@@ -87,7 +87,9 @@
     	<div class="sidebar">	
     		<h2>Instructions:</h2>
 			<p>Move mouse pointer around the canvas to move the point of gravity</p>
-			<p>Hold down a mouse button to switch to anti-gravity</p>
+			<p>Hold down left mouse button to switch to anti-gravity</p>
+			<p>Hold down middle mouse button (or alt key) and drag to rotate camera (including in Depth map view)</p>
+			<p>Use scroll wheel to zoom</p>
 			<div style="padding-bottom: 10px;">
 			</div>
 		</div>
@@ -117,7 +119,7 @@
 			</div>
 			<div style="padding-bottom: 10px;">
 				<input type="checkbox" id="drawDepth" name="drawDepth" value="drawDepth" onchange="toggleDrawDepth()">
-				<label for="drawDepth">Draw depth map</label>
+				<label for="drawDepth">Depth map view</label>
 			</div>
 			<div style="padding-bottom: 10px;">
 				<input type="checkbox" id="drawShadows" name="drawShadows" value="drawShadows" onchange="toggleDrawShadows()" checked>

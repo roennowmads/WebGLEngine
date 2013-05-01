@@ -145,16 +145,13 @@ GLShowParticles.prototype.drawBillboards = function (gl, posTex, billboardTex) {
 	gl.drawArrays(gl.POINTS, 0, this.indexNumItems)
 }
 
-GLShowParticles.prototype.drawBillboardsDepth = function (gl, posTex, billboardTex) {
+GLShowParticles.prototype.drawBillboardsDepth = function (gl, posTex) {
 	//if (this.identifier != lastGLObject && lastDrawTarget != DRAWTARGETS.CANVAS) 		//Optimizes by not binding buffers again for subsequent instances of the same mesh.
 	this.bindUVsBuffer(gl);
 	
 	//Bind texture to read vertex positions from:
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, posTex);
-	
-	gl.activeTexture(gl.TEXTURE1);
-	gl.bindTexture(gl.TEXTURE_2D, billboardTex);
 	
 	plmMatrix = mat4.multiply(pMatrix, mat4.multiply(lightVMatrix, mMatrix, plmMatrix), plmMatrix)
 	gl.uniformMatrix4fv(this.view.currentProgram.getUniform("pMVMatrixUniform"), false, plmMatrix);

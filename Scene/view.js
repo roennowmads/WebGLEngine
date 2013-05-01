@@ -61,8 +61,9 @@ View.prototype.initView = function () {
 	this.scripts.addProgram("updateVelParticleShader", "FBTexture", "updateVelParticle");
 	this.scripts.addProgram("updatePosParticleShader", "FBTexture", "updatePosParticle");
 	this.scripts.addProgram("renderTextureShader", "FBTexture", "FBTexture");
-	this.scripts.addProgram("shadowShader", "shadow", "shadow");
+	this.scripts.addProgram("depthShader", "depth", "passthrough");
 	this.scripts.addProgram("phongShadowShader", "phongShadow", "phongShadow");
+	this.scripts.addProgram("showBillboardShadowShader", "showBillboard", "passthrough");
 	this.scripts.addProgram("blurShader", "FBTexture", "blur");
 	this.scripts.addProgram("renderTextureAdditiveShader", "FBTexture", "FBTextureAdditive");
 	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboardEmitter");
@@ -96,7 +97,7 @@ View.prototype.setupShadersAndObjects = function (thisClass) {
 	thisClass.particles.setup(gl);
 	thisClass.particles2.setup(gl);
 	thisClass.particleEmitter.setup(gl);
-	thisClass.setupShadowShader(gl);
+	thisClass.setupDepthShader(gl);
 	thisClass.setupPhongShadowShader(gl);
 	thisClass.setupRenderTextureShader(gl);
 	thisClass.setupRenderTextureAdditiveShader(gl);
@@ -251,7 +252,7 @@ function startTicking() {
 
 View.prototype.drawHouseAndGroundFromLight = function (gl) {
 	mvPushMatrix();
-		this.currentProgram = this.scripts.getProgram("shadowShader").useProgram(gl);
+		this.currentProgram = this.scripts.getProgram("depthShader").useProgram(gl);
 		
 		gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
 		
@@ -381,8 +382,8 @@ View.prototype.blurFBinit = function (gl) {
 	this.blurFB = new FBO(gl, 128, false, true);
 }
 
-View.prototype.setupShadowShader = function (gl) {
-	this.currentProgram = this.scripts.getProgram("shadowShader").useProgram(gl);
+View.prototype.setupDepthShader = function (gl) {
+	this.currentProgram = this.scripts.getProgram("depthShader").useProgram(gl);
 	gl.uniform3fv(this.currentProgram.getUniform("lightingPositionUniform"), this.lightPosition);
 	this.setShadowMatrixUniforms(gl);
 	this.setPMatrixUniform(gl);
