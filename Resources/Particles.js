@@ -69,7 +69,7 @@ Particles.prototype.drawBillboards = function (gl, pointSize, depth, amplify) {
 			//Make the shadow for the points bigger, so their size correspond to the object's size:
 			//(this happens because the point size is relative to the distance from the camera, 
 			// while the points' shadows sixe is relative to the distance from the light)
-			gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize*pointSize);
+			gl.uniform1f(this.view.currentProgram.getUniform("pointSizeUniform"), pointSize/**pointSize*/);
 			this.showParticlesModel.drawBillboardsDepth(gl, this.posFB.texFront);
 		}
 	mvPopMatrix();

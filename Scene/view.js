@@ -33,7 +33,7 @@ function View() {
 	this.particleEmitter;
 	
 	this.cameraPosition = vec3.create([0,5,5]);
-	this.lightPosition = vec3.create([-4,5,0]);
+	this.lightPosition = vec3.create([-8,7,0]);
 	
 	this.rotateShadowXCounter = 0.0;
 	this.rotateShadowYCounter = 0.0;
@@ -67,6 +67,7 @@ View.prototype.initView = function () {
 	this.scripts.addProgram("blurShader", "FBTexture", "blur");
 	this.scripts.addProgram("renderTextureAdditiveShader", "FBTexture", "FBTextureAdditive");
 	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboardEmitter");
+	this.scripts.addProgram("depthParticleEmitterShader", "particleEmitter", "passthroughParticleEmitter");
 	
 	//Downloads scripts and calls loadTextures when done, which calls setupShadersAndObjects when done:
 	this.scripts.loadScripts();
@@ -134,10 +135,30 @@ View.prototype.draw = function () {
 	//Create depth map:
 	this.drawHouseAndGroundFromLight(gl);	
 	
+	//Apply blur, first horizontal, then vertical:
+	this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
+	//Bind the blur framebuffer:
+	this.smallShadowFB.bind(gl, this.smallShadowFB.front);
+	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
+	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.shadowFB.texDepth);
+	this.smallShadowFB.bind(gl, this.smallShadowFB.back);
+	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
+	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.smallShadowFB.texFront);
+	
+	//Copy blurred texture to the larger shadow texture, and scale it with linear filtering at the same time:
+	this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
+	this.shadowFB.bind(gl, this.shadowFB.front);
+	this.squareModel.drawOnFBMulti(this.gl, this.shadowFB, this.smallShadowFB.texBack);
+	
+	this.shadowFB.unbind(gl);
+	
+	//if (false)
 	if (this.drawDepth) {
 		//Draw depth map directly to the screen:
 		this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
-		this.squareModel.drawOnFBMulti(this.gl, this.shadowFB, this.shadowFB.texDepth, this.shadowFB.texDepth);
+		this.squareModel.drawOnFBOne(this.gl, this.shadowFB, this.shadowFB.texFront);
 	} else {
 		//Draw the scene:
 		
@@ -185,17 +206,19 @@ View.prototype.draw = function () {
 			this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
 			//Bind the blur framebuffer:
 			this.blurFB.bind(gl, this.blurFB.front);
+			this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 			gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
-			this.squareModel.drawOnFBOne(this.gl, this.sceneFB, this.sceneFB.texFront);
+			this.squareModel.drawOnFBOne(this.gl, this.blurFB, this.sceneFB.texFront);
+			this.blurFB.bind(gl, this.blurFB.back);
 			gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
-			this.squareModel.drawOnFBOne(this.gl, this.sceneFB, this.blurFB.texFront);
+			this.squareModel.drawOnFBOne(this.gl, this.blurFB, this.blurFB.texFront);
 			
 			//Render the texture:
 			this.currentProgram = this.scripts.getProgram("renderTextureAdditiveShader").useProgram(gl);
 			this.sceneFB.unbind(gl);
 			gl.uniform1f(this.currentProgram.getUniform("tex1RateUniform"), 0.75);
 			gl.uniform1f(this.currentProgram.getUniform("tex2RateUniform"), 0.7);
-			this.squareModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texFront, this.sceneFB.texFront);
+			this.squareModel.drawOnFBMulti(this.gl, this.sceneFB, this.blurFB.texBack, this.sceneFB.texFront);
 		}
 		else {		
 			this.drawHouseAndGround(gl);
@@ -323,7 +346,7 @@ View.prototype.drawHouseAndGround = function (gl) {
 	mvPushMatrix();
 		//Bind the depth texture for use in the shader:
 		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, this.shadowFB.texDepth);
+		gl.bindTexture(gl.TEXTURE_2D, this.shadowFB.texFront);
 	
 		gl.disable(gl.BLEND);
 		
@@ -369,7 +392,8 @@ View.prototype.drawHouseAndGround = function (gl) {
 
 View.prototype.shadowFBinit = function (gl) {
 	//Create framebuffer with depth component:
-	this.shadowFB = new FBO(gl, 4096, true);
+	this.shadowFB = new FBO(gl, 1024, true, true);
+	this.smallShadowFB = new FBO(gl, 512, false, true);
 }
 View.prototype.sceneFBinit = function (gl) {
 	//Create framebuffer with depth component:

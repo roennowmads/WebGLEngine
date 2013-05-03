@@ -4,6 +4,7 @@ function ParticleEmitter (view, texture) {
 	this.texture = texture;
 	this.showParticlesModel;
 	this.particleEmitterShader = this.view.scripts.getProgram("particleEmitterShader");
+	this.depthParticleEmitterShader = this.view.scripts.getProgram("depthParticleEmitterShader");
 }
 
 ParticleEmitter.prototype.setup = function (gl) {
@@ -29,7 +30,7 @@ ParticleEmitter.prototype.draw = function (gl) {
 }
 
 ParticleEmitter.prototype.drawDepth = function (gl) {
-	this.view.currentProgram = this.particleEmitterShader.useProgram(gl);
+	this.view.currentProgram = this.depthParticleEmitterShader.useProgram(gl);
 	this.showParticlesModel.drawEmitterBillboardsDepth(gl);
 }
 
@@ -38,8 +39,6 @@ ParticleEmitter.prototype.setupShowBillboardShader = function (gl) {
 	
 	//Texture:
 	gl.uniform1i(this.view.currentProgram.getUniform("billUniform"), 0);
-	
-	this.view.setPMVMatrixUniforms(gl);
 	
 	this.showParticlesModel = new GLShowParticles(gl, 2, this.view);
 	this.showParticlesModel.generateEmitterAndBuffer(gl, 750, .075, 1000);

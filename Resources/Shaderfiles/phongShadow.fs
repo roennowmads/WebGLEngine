@@ -39,16 +39,24 @@ void main(void) {
 	
 	//Use texture2DProj to project the texture by dividing by the 4th component. Since we cannot use the result of the division, 
 	//we have to multiply by the 4th component in the following depth comparison.
-	float depthMapDepth = texture2DProj(uDepthMap, vVL).x;
+	//float depthMapDepth = texture2DProj(uDepthMap, vVL).x;
 	
 	//"Cure" shadow acne:
-	projectedDepth.z *= 0.999;
+	projectedDepth.z *= 0.9999;
 	
 	//If the distance to the camera from this fragment is larger than the distance recorded in the depth map, then in shadow:
 	//The multiplication unprojects the depth map, and is done to avoid a division by the 4th component earlier in the code.
-	if (depthMapDepth * vVL.w < projectedDepth.z)
-		lightWeighting *= 0.5;
+	//if (depthMapDepth * vVL.w < projectedDepth.z)
+	//	lightWeighting *= 0.5;
 	
+	
+	//
+	// Exponential shadow map algorithm
+	//
+	float c = 4.0;
+	float texel = texture2DProj(uDepthMap, vVL).x;
+	float shadow = clamp(exp(-c * (projectedDepth.z / vVL.w - texel)), 0.0, 1.0)*2.0 - 1.0;
+	lightWeighting *= shadow;
 	
 	vec4 textureColor = texture2D(uTexture, vTextureCoord);
 	gl_FragColor = vec4(textureColor.rgb * lightWeighting, textureColor.a);
