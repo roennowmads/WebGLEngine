@@ -299,7 +299,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		//Ground:
 		mvPushMatrix();
 			mat4.translate(mMatrix, [0.0,-.16,0.0]);
-			mat4.scale(mMatrix, [3, 0.05, 3]);
+			mat4.scale(mMatrix, [3.07, 0.05, 3.07]);
 			
 			this.groundModel.texture = this.groundTex.texture;
 			this.groundModel.drawDepth(gl);
@@ -314,7 +314,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 			mat4.multiply(mMatrix, rotMatrix);
 			
 			mat4.translate(mMatrix, [2.0,1.0,0.0]);
-			mat4.scale(mMatrix, [0.5, 0.05, 0.5]);
+			mat4.scale(mMatrix, [0.57, 0.05, 0.57]);
 			
 			this.groundModel.texture = this.groundTex.texture;
 			this.groundModel.drawDepth(gl);
@@ -363,7 +363,7 @@ View.prototype.drawHouseAndGround = function (gl) {
 		//Ground:
 		mvPushMatrix();		
 			mat4.translate(mMatrix, [0.0,-.16,0.0]);
-			mat4.scale(mMatrix, [3, 0.05, 3]);
+			mat4.scale(mMatrix, [3.0, 0.05, 3.0]);
 			this.groundModel.texture = this.groundTex.texture;
 			this.groundModel.draw(gl);
 		mvPopMatrix();
