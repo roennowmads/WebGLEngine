@@ -66,6 +66,7 @@ View.prototype.initView = function () {
 	this.scripts.addProgram("phongShadowShader", "phongShadow", "phongShadow");
 	this.scripts.addProgram("showBillboardShadowShader", "showBillboard", "passthrough");
 	this.scripts.addProgram("blurShader", "FBTexture", "blur");
+	this.scripts.addProgram("blurBloomShader", "FBTexture", "blurBloom");
 	this.scripts.addProgram("renderTextureAdditiveShader", "FBTexture", "FBTextureAdditive");
 	this.scripts.addProgram("particleEmitterShader", "particleEmitter", "showBillboardEmitter");
 	this.scripts.addProgram("depthParticleEmitterShader", "particleEmitter", "passthroughParticleEmitter");
@@ -206,7 +207,7 @@ View.prototype.draw = function () {
 			mvPopMatrix();
 			
 			//Apply blur, first horizontal, then vertical:
-			this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
+			this.currentProgram = this.scripts.getProgram("blurBloomShader").useProgram(gl);
 			//Bind the blur framebuffer:
 			this.blurFB.bind(gl, this.blurFB.front);
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT);
