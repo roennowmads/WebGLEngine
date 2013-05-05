@@ -315,6 +315,10 @@ function toggleDrawShadows () {
 	view.drawShadows = !view.drawShadows;
 }
 
+function toggleDrawSoftShadows () {
+	view.drawSoftShadows = !view.drawSoftShadows;
+}
+
 function toggleRotate () {
 	if (view.isRotating)
 		view.rotateYCounter = 0;

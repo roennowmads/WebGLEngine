@@ -22,6 +22,7 @@ function View() {
 	this.isUpdatingVelocities = true;
 	this.isUpdatingPositions = true;
 	this.drawShadows = true;
+	this.drawSoftShadows = true;
 	this.drawDepth = false;
 	this.drawVelocity = false;
 	this.drawBloom = false;
@@ -135,24 +136,26 @@ View.prototype.draw = function () {
 	//Create depth map:
 	this.drawHouseAndGroundFromLight(gl);	
 	
-	//Apply blur, first horizontal, then vertical:
-	this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
-	//Bind the blur framebuffer:
-	this.smallShadowFB.bind(gl, this.smallShadowFB.front);
-	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
-	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.shadowFB.texFront);
-	this.smallShadowFB.bind(gl, this.smallShadowFB.back);
-	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
-	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.smallShadowFB.texFront);
-	
-	//Copy blurred texture to the larger shadow texture, and scale it with linear filtering at the same time:
-	this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
-	this.shadowFB.bind(gl, this.shadowFB.front);
-	this.squareModel.drawOnFBMulti(this.gl, this.shadowFB, this.smallShadowFB.texBack);
-	
-	this.shadowFB.unbind(gl);
+	if (this.drawSoftShadows) {
+		//Apply blur, first horizontal, then vertical:
+		this.currentProgram = this.scripts.getProgram("blurShader").useProgram(gl);
+		//Bind the blur framebuffer:
+		this.smallShadowFB.bind(gl, this.smallShadowFB.front);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
+		this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.shadowFB.texFront);
+		this.smallShadowFB.bind(gl, this.smallShadowFB.back);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
+		this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.smallShadowFB.texFront);
+		
+		//Copy blurred texture to the larger shadow texture, and scale it with linear filtering at the same time:
+		this.currentProgram = this.scripts.getProgram("renderTextureShader").useProgram(gl);
+		this.shadowFB.bind(gl, this.shadowFB.front);
+		this.squareModel.drawOnFBMulti(this.gl, this.shadowFB, this.smallShadowFB.texBack);
+		
+		this.shadowFB.unbind(gl);
+	}
 	
 	//if (false)
 	if (this.drawDepth) {
