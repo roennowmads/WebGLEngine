@@ -22,7 +22,7 @@ function View() {
 	this.isUpdatingVelocities = true;
 	this.isUpdatingPositions = true;
 	this.drawShadows = true;
-	this.drawSoftShadows = true;
+	this.drawSoftShadows = false;
 	this.drawDepth = false;
 	this.drawVelocity = false;
 	this.drawBloom = false;
@@ -51,9 +51,9 @@ View.prototype.initView = function () {
 	if (!float_texture_ext)
 		alert("OES_texture_float extension is not available!");
 	
-	var depth_texture_ext = this.gl.getExtension('WEBGL_depth_texture');
+	/*var depth_texture_ext = this.gl.getExtension('WEBGL_depth_texture');
 	if (!depth_texture_ext)
-		alert("WEBGL_depth_texture extension is not available!");
+		alert("WEBGL_depth_texture extension is not available!");*/
 		
 	//Create shader programs:
 	this.scripts = new ShaderScriptLoader(this.gl, this.loadTextures, this);

@@ -10,7 +10,8 @@ function FBO (gl, width, includeDepth, linearFiltering) {
 	
 	//In the cases where depth is needed, double buffering is not needed, so do not create a second buffer:
 	if (includeDepth) {
-		this.texDepth = this.bindFBAndAttachDepthTex(gl, this.buffer1);
+		//this.texDepth = this.bindFBAndAttachDepthTex(gl, this.buffer1);
+		this.addSimpleDepth(gl, this.buffer1);
 	}
 	else {
 		this.buffer2 = gl.createFramebuffer();
@@ -20,6 +21,13 @@ function FBO (gl, width, includeDepth, linearFiltering) {
 	
 	this.front = this.buffer1;
 	this.back = this.buffer2;
+}
+
+FBO.prototype.addSimpleDepth = function (gl, buffer) {
+	gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+	var depthBuffer = gl.createRenderbuffer();
+	gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.widthFB, this.heightFB);
 }
 
 FBO.prototype.bindFBAndAttachDepthTex = function (gl, buffer) {
