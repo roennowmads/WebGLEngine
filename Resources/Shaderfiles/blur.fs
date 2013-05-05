@@ -5,7 +5,7 @@ uniform int uOrientation;
 
 varying vec2 vTexCoords;
 
-const vec2 texelSize = vec2(.0025,.0025);
+const vec2 texelSize = vec2(.00125,.00125);
 const int blurAmount = 3;
 const int halfBlur = blurAmount / 2;
 

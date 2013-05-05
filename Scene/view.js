@@ -141,7 +141,7 @@ View.prototype.draw = function () {
 	this.smallShadowFB.bind(gl, this.smallShadowFB.front);
 	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 0);
-	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.shadowFB.texDepth);
+	this.squareModel.drawOnFBOne(this.gl, this.smallShadowFB, this.shadowFB.texFront);
 	this.smallShadowFB.bind(gl, this.smallShadowFB.back);
 	this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 	gl.uniform1i(this.currentProgram.getUniform("orientationUniform"), 1);
@@ -281,11 +281,11 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		this.shadowFB.bind(gl, this.shadowFB.front);
 		
 		gl.viewport(0, 0, this.shadowFB.widthFB, this.shadowFB.widthFB);
-		gl.clear(gl.DEPTH_BUFFER_BIT);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);//gl.clear(gl.DEPTH_BUFFER_BIT);
 		gl.disable(gl.BLEND);
 		
 		//We only need the depth, so disable colour writes (this improves performance significantly):
-		gl.colorMask(false, false, false, false);
+		//gl.colorMask(false, false, false, false);
 		
 		//Setup light "camera"
 		mat4.lookAt(this.lightPosition, [0,0,0], [0,1,0], lightVMatrix);
@@ -337,7 +337,7 @@ View.prototype.drawHouseAndGroundFromLight = function (gl) {
 		
 		//Re-enable blending and colour writes:
 		gl.enable(gl.BLEND);
-		gl.colorMask(true, true, true, true);
+		//gl.colorMask(true, true, true, true);
 	
 	mvPopMatrix();
 }
